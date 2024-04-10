@@ -53,17 +53,17 @@ int main()
 
     stbi_set_flip_vertically_on_load(true);
 
-    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 model;
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
-    Shader objectShader = Shader("Shaders/default.vert", "Shaders/BP_pointLights.frag");
-    Shader windowShader = Shader("Shaders/default.vert", "Shaders/alphatexture.frag");
-    Shader solidColorShader = Shader("Shaders/default.vert", "Shaders/solidColor.frag");
-    Shader skyboxShader = Shader("Shaders/skybox.vert", "Shaders/skybox.frag");
-    Shader reflectionShader = Shader("Shaders/default.vert", "Shaders/skyboxReflection.frag");
-    Shader refractionShader = Shader("Shaders/default.vert", "Shaders/skyboxRefraction.frag");
-    Shader screenSpaceShader = Shader("Shaders/defaultScreenSpace.vert", "Shaders/postProcess.frag");
+    Shader objectShader         = Shader("shaders/general/default.vert", "shaders/lighting/blinn-phong/point_lights.frag");
+    Shader windowShader         = Shader("shaders/general/default.vert", "shaders/general/alphatexture.frag");
+    Shader solidColorShader     = Shader("shaders/general/default.vert", "shaders/general/solidColor.frag");
+    Shader reflectionShader     = Shader("shaders/general/default.vert", "shaders/general/skyboxReflection.frag");
+    Shader refractionShader     = Shader("shaders/general/default.vert", "shaders/general/skyboxRefraction.frag");
+    Shader skyboxShader         = Shader("shaders/general/skybox.vert", "shaders/general/skybox.frag");
+    Shader screenSpaceShader    = Shader("shaders/post_processing/defaultScreenSpace.vert", "shaders/post_processing/postProcess.frag");
 
     std::vector<Shader*> uniformBlockShaders { &objectShader, &windowShader, &solidColorShader, &skyboxShader, &reflectionShader, &refractionShader };
     Shader::bindUniformBuffer(uniformBlockShaders, "Matrices", 0);
@@ -81,13 +81,13 @@ int main()
     glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    Model backpack = Model("Models/Backpack/backpack.obj");
-    Model floor = Model("Models/Floor/floor.obj");
+    Model backpack = Model("assets/models/backpack/backpack.obj");
+    Model floor = Model("assets/models/floor/floor.obj");
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
     createViewportSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
-    windowTexture = loadTexture("Textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
+    windowTexture = loadTexture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
 
     unsigned int screenVAO, screenVBO, screenEBO, screenIndicesCount;
     createViewportSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
@@ -96,14 +96,14 @@ int main()
     createSkyboxCube(skyboxVAO);
 
     vector<string> skyboxFaces
-            {
-                    "Textures/Yokohama/right.jpg",
-                    "Textures/Yokohama/left.jpg",
-                    "Textures/Yokohama/top.jpg",
-                    "Textures/Yokohama/bottom.jpg",
-                    "Textures/Yokohama/front.jpg",
-                    "Textures/Yokohama/back.jpg"
-            };
+    {
+        "assets/textures/yokohama/right.jpg",
+        "assets/textures/yokohama/left.jpg",
+        "assets/textures/yokohama/top.jpg",
+        "assets/textures/yokohama/bottom.jpg",
+        "assets/textures/yokohama/front.jpg",
+        "assets/textures/yokohama/back.jpg"
+    };
     stbi_set_flip_vertically_on_load(false);
     skyboxTexture = loadCubemap(skyboxFaces, GL_RGB, GL_RGB);
     stbi_set_flip_vertically_on_load(true);
