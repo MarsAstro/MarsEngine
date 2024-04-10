@@ -35,6 +35,9 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         libraries/stb_image.cpp)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
+file(COPY assets DESTINATION .)
+file(COPY shaders DESTINATION .)
+
 
 # Library linking
 target_link_libraries(${CMAKE_PROJECT_NAME} glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
