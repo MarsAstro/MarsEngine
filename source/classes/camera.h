@@ -40,9 +40,9 @@ public:
 
     void ProcessKeyboard(Camera_Movement direction, float deltaTime, bool tripleSpeed);
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
-    void ProcessMouseScroll(float yoffset);
+    void ProcesMouseScroll(float yoffset);
 
 private:
-    void updateCameraVectors();
+    void UpdateCameraVectors();
 };
 

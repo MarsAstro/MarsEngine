@@ -4,37 +4,37 @@
 
 Model::Model(const char* path)
 {
-    loadModel(path);
+    LoadModel(path);
 }
 
-void Model::draw(Shader& shader)
+void Model::Draw(Shader& shader)
 {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::scale(model, scale);
 
-    shader.setMat4("model", model);
+    shader.SetMat4("model", model);
 
     for (unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].draw(shader);
+        meshes[i].Draw(shader);
 }
 
-void Model::draw_outline(Shader& shader, glm::vec3 color, float thickness)
+void Model::Draw_outline(Shader& shader, glm::vec3 color, float thickness)
 {
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glStencilMask(0xFF);
-    draw(shader);
+    Draw(shader);
 
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilMask(0x00);
     glDisable(GL_DEPTH_TEST);
 
     Shader solidColorShader = Shader("default.vert", "solidColor.frag");
-    solidColorShader.use();
-    solidColorShader.setVec3("objectColor", color);
+    solidColorShader.Use();
+    solidColorShader.SetVec3("objectColor", color);
 
     scale = glm::vec3(1 + (thickness * .01f));
-    draw(solidColorShader);
+    Draw(solidColorShader);
     scale = glm::vec3(1.0f);
 
     glStencilMask(0xFF);
@@ -42,7 +42,7 @@ void Model::draw_outline(Shader& shader, glm::vec3 color, float thickness)
     glEnable(GL_DEPTH_TEST);
 }
 
-void Model::loadModel(std::string path)
+void Model::LoadModel(std::string path)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -54,24 +54,24 @@ void Model::loadModel(std::string path)
     }
     directory = path.substr(0, path.find_last_of('/'));
 
-    processNode(scene->mRootNode, scene);
+    ProcessNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene)
+void Model::ProcessNode(aiNode* node, const aiScene* scene)
 {
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(processMesh(mesh, scene));
+        meshes.push_back(ProcessMesh(mesh, scene));
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        processNode(node->mChildren[i], scene);
+        ProcessNode(node->mChildren[i], scene);
     }
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -117,17 +117,17 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+        std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+        std::vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
 
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName)
+std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* material, aiTextureType type, std::string typeName)
 {
     std::vector<Texture> textures;
     for (unsigned int i = 0; i < material->GetTextureCount(type); i++)
@@ -149,7 +149,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* material, aiTexture
         if (!skip)
         {
             Texture texture;
-            texture.id = textureFromFile(str.C_Str(), directory);
+            texture.id = TextureFromFile(str.C_Str(), directory);
             texture.type = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);
@@ -160,7 +160,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* material, aiTexture
     return textures;
 }
 
-unsigned int Model::textureFromFile(const char* path, const std::string& directory, bool gamma)
+unsigned int Model::TextureFromFile(const char* path, const std::string& directory, bool gamma)
 {
     std::string filename = std::string(path);
     filename = directory + '/' + filename;

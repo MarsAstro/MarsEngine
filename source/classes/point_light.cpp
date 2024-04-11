@@ -9,7 +9,7 @@ using std::string;
 
 PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic)
 {
-    createOriginCube(0.025f, VAO, VBO);
+    CreateOriginCube(0.025f, VAO, VBO);
     PointLight(position, color, ambientLevel, diffuseLevel, specularLevel, constant, linear, quadratic, VAO);
 }
 
@@ -31,7 +31,7 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, 
     VBO = VAO;
 }
 
-void PointLight::updateShader(Shader& shader, glm::mat4 viewMatrix, int index)
+void PointLight::UpdateShader(Shader& shader, glm::mat4 viewMatrix, int index)
 {
     string prefix = "pointLight.";
 
@@ -40,15 +40,15 @@ void PointLight::updateShader(Shader& shader, glm::mat4 viewMatrix, int index)
 
     glm::vec3 viewSpacePosition = glm::vec3(viewMatrix * glm::vec4(position, 1.0f));
 
-    shader.setVec3(prefix + "position", viewSpacePosition);
+    shader.SetVec3(prefix + "position", viewSpacePosition);
 
-    shader.setVec3(prefix + "ambient", ambient);
-    shader.setVec3(prefix + "diffuse", diffuse);
-    shader.setVec3(prefix + "specular", specular);
+    shader.SetVec3(prefix + "ambient", ambient);
+    shader.SetVec3(prefix + "diffuse", diffuse);
+    shader.SetVec3(prefix + "specular", specular);
 
-    shader.setFloat(prefix + "constant", constant);
-    shader.setFloat(prefix + "linear", linear);
-    shader.setFloat(prefix + "quadratic", quadratic);
+    shader.SetFloat(prefix + "constant", constant);
+    shader.SetFloat(prefix + "linear", linear);
+    shader.SetFloat(prefix + "quadratic", quadratic);
 }
 
 void PointLight::Draw(Shader& shader)
@@ -56,8 +56,8 @@ void PointLight::Draw(Shader& shader)
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
 
-    shader.setMat4("model", model);
-    shader.setVec3("objectColor", color);
+    shader.SetMat4("model", model);
+    shader.SetVec3("objectColor", color);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -12,7 +12,7 @@ public:
     PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic);
     PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic, unsigned int VAO);
 
-    void updateShader(Shader& shader, glm::mat4 viewMatrix, int index = -1);
+    void UpdateShader(Shader& shader, glm::mat4 viewMatrix, int index = -1);
     void Draw(Shader& shader);
 
     glm::vec3 position;

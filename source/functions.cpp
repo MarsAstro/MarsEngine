@@ -15,7 +15,7 @@ float clamp(float d, float min, float max) {
     return t > max ? max : t;
 }
 
-void createViewportSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
+void CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
 {
     fillLevel = clamp(fillLevel, 0.0f, 1.0f);
 
@@ -58,7 +58,7 @@ void createViewportSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO,
     glEnableVertexAttribArray(2);
 }
 
-void createOriginCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
+void CreateOriginCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
 {
     float vertices[] = {
             -sideLength, -sideLength, -sideLength, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
@@ -122,7 +122,7 @@ void createOriginCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
     glEnableVertexAttribArray(2);
 }
 
-void createSkyboxCube(unsigned int& VAO)
+void CreateSkyboxCube(unsigned int& VAO)
 {
     float skyboxVertices[] = {
             -1.0f,  1.0f, -1.0f,
@@ -181,7 +181,7 @@ void createSkyboxCube(unsigned int& VAO)
     glEnableVertexAttribArray(0);
 }
 
-void createViewportTriangle(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
+void CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
 {
     fillLevel = clamp(fillLevel, 0.0f, 1.0f);
 
@@ -222,7 +222,7 @@ void createViewportTriangle(float fillLevel, unsigned int& VAO, unsigned int& VB
     glEnableVertexAttribArray(2);
 }
 
-unsigned int loadTexture(const char* texturePath, GLenum internalFormat, GLenum outputFormat, GLenum wrapFormat)
+unsigned int LoadTexture(const char* texturePath, GLenum internalFormat, GLenum outputFormat, GLenum wrapFormat)
 {
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -252,7 +252,7 @@ unsigned int loadTexture(const char* texturePath, GLenum internalFormat, GLenum 
     return texture;
 }
 
-unsigned int loadCubemap(vector<string> faces, GLenum internalFormat, GLenum outputFormat)
+unsigned int LoadCubemap(vector<string> faces, GLenum internalFormat, GLenum outputFormat)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -288,7 +288,7 @@ unsigned int loadCubemap(vector<string> faces, GLenum internalFormat, GLenum out
     return textureID;
 }
 
-GLFWwindow* setupGLFWwindow(int windowWith, int windowHeight, const char* title)
+GLFWwindow* SetupGLFWWindow(int windowWith, int windowHeight, const char* title)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -309,7 +309,7 @@ GLFWwindow* setupGLFWwindow(int windowWith, int windowHeight, const char* title)
     return window;
 }
 
-int initializeGLADLoader()
+int InitializeGLADLoader()
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
