@@ -29,7 +29,7 @@ void Model::Draw_outline(Shader& shader, glm::vec3 color, float thickness)
     glStencilMask(0x00);
     glDisable(GL_DEPTH_TEST);
 
-    Shader solidColorShader = Shader("default.vert", "solidColor.frag");
+    Shader solidColorShader = Shader("default.vert", "solid_color.frag");
     solidColorShader.Use();
     solidColorShader.SetVec3("objectColor", color);
 

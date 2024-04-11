@@ -58,12 +58,12 @@ int main()
     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
     Shader objectShader         = Shader("shaders/general/default.vert", "shaders/lighting/blinn-phong/point_lights.frag");
-    Shader windowShader         = Shader("shaders/general/default.vert", "shaders/general/alphatexture.frag");
-    Shader solidColorShader     = Shader("shaders/general/default.vert", "shaders/general/solidColor.frag");
-    Shader reflectionShader     = Shader("shaders/general/default.vert", "shaders/general/skyboxReflection.frag");
-    Shader refractionShader     = Shader("shaders/general/default.vert", "shaders/general/skyboxRefraction.frag");
+    Shader windowShader         = Shader("shaders/general/default.vert", "shaders/general/transparent_texture.frag");
+    Shader solidColorShader     = Shader("shaders/general/default.vert", "shaders/general/solid_color.frag");
+    Shader reflectionShader     = Shader("shaders/general/default.vert", "shaders/general/skybox_reflection.frag");
+    Shader refractionShader     = Shader("shaders/general/default.vert", "shaders/general/skybox_refraction.frag");
     Shader skyboxShader         = Shader("shaders/general/skybox.vert", "shaders/general/skybox.frag");
-    Shader screenSpaceShader    = Shader("shaders/post_processing/defaultScreenSpace.vert", "shaders/post_processing/postProcess.frag");
+    Shader screenSpaceShader    = Shader("shaders/post_processing/default_screen_space.vert", "shaders/post_processing/default_screen_space.frag");
 
     std::vector<Shader*> uniformBlockShaders { &objectShader, &windowShader, &solidColorShader, &skyboxShader, &reflectionShader, &refractionShader };
     Shader::BindUniformBuffer(uniformBlockShaders, "Matrices", 0);
