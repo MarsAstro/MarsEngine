@@ -13,9 +13,10 @@
 #include "classes/camera.h"
 #include "classes/model.h"
 #include "classes/point_light_collection.h"
+#include "classes/shader_manager.h"
 
-const int SCREEN_WIDTH = 1200;
-const int SCREEN_HEIGHT = 900;
+constexpr int SCREEN_WIDTH = 1200;
+constexpr int SCREEN_HEIGHT = 900;
 int screen_width = SCREEN_WIDTH;
 int screen_height = SCREEN_HEIGHT;
 
@@ -55,18 +56,39 @@ int main()
 
     glm::mat4 model;
     glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
+                                            static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f,
+                                            100.0f);
 
-    Shader objectShader         = Shader("shaders/general/default.vert", "shaders/lighting/blinn-phong/point_lights.frag");
-    Shader windowShader         = Shader("shaders/general/default.vert", "shaders/general/transparent_texture.frag");
-    Shader solidColorShader     = Shader("shaders/general/default.vert", "shaders/general/solid_color.frag");
-    Shader reflectionShader     = Shader("shaders/general/default.vert", "shaders/general/skybox_reflection.frag");
-    Shader refractionShader     = Shader("shaders/general/default.vert", "shaders/general/skybox_refraction.frag");
-    Shader skyboxShader         = Shader("shaders/general/skybox.vert", "shaders/general/skybox.frag");
-    Shader screenSpaceShader    = Shader("shaders/post_processing/default_screen_space.vert", "shaders/post_processing/default_screen_space.frag");
+    ShaderManager shaderManager = ShaderManager();
 
-    std::vector<Shader*> uniformBlockShaders { &objectShader, &windowShader, &solidColorShader, &skyboxShader, &reflectionShader, &refractionShader };
-    Shader::BindUniformBuffer(uniformBlockShaders, "Matrices", 0);
+    Shader* objectShader         = shaderManager.CreateShader(
+        "shaders/general/default.vert",
+        "shaders/lighting/blinn-phong/point_lights.frag",
+        { Matrices });
+    Shader* windowShader         = shaderManager.CreateShader(
+        "shaders/general/default.vert",
+        "shaders/general/transparent_texture.frag",
+        { Matrices });
+    Shader* solidColorShader     = shaderManager.CreateShader(
+        "shaders/general/default.vert",
+        "shaders/general/solid_color.frag",
+        { Matrices });
+    Shader* reflectionShader     = shaderManager.CreateShader(
+        "shaders/general/default.vert",
+        "shaders/general/skybox_reflection.frag",
+        { Matrices });
+    Shader* refractionShader     = shaderManager.CreateShader(
+        "shaders/general/default.vert",
+        "shaders/general/skybox_refraction.frag",
+        { Matrices });
+    Shader* skyboxShader         = shaderManager.CreateShader(
+        "shaders/general/skybox.vert",
+        "shaders/general/skybox.frag",
+        { Matrices });
+    Shader* screenSpaceShader    = shaderManager.CreateShader(
+        "shaders/post_processing/default_screen_space.vert",
+        "shaders/post_processing/default_screen_space.frag");
 
     unsigned int uboMatrices;
     glGenBuffers(1, &uboMatrices);
@@ -118,9 +140,9 @@ int main()
     pointLightCollection.AddLightAtPosition(glm::vec3(1.2f, 1.0f, 2.0f));
     pointLightCollection.AddLightAtPosition(glm::vec3(-15.0f, -1.0f, -15.0f));
 
-    vector<glm::vec3> windows;
-    windows.emplace_back(0.0f, -1.0f, -5.0f);
-    windows.emplace_back(0.0f, -1.0f,  7.0f);
+    vector<glm::vec3> windowObjects;
+    windowObjects.emplace_back(0.0f, -1.0f, -5.0f);
+    windowObjects.emplace_back(0.0f, -1.0f,  7.0f);
 
     SetupFramebuffer();
 
@@ -154,19 +176,15 @@ int main()
         ProcessInput(window);
 
         view = camera.GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)screen_width / (float)screen_height, 0.1f, 100.0f);
-
-        glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screen_width) / static_cast<float>(screen_height), 0.1f, 100.0f);
 
         Shader::FillMatricesUniformBuffer(uboMatrices, view, projection);
 
         /*
         * Draw solid objects
         */
-        objectShader.Use();
-        objectShader.SetFloat("material.shininess", 64.0f);
+        objectShader->Use();
+        objectShader->SetFloat("material.shininess", 64.0f);
 
         pointLightCollection.lights[0].position = glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f);
         pointLightCollection.lights[1].position = glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0);
@@ -178,15 +196,15 @@ int main()
         /*
         * Draw environment mapped objects
         */
-        reflectionShader.Use();
-        reflectionShader.SetVec3("cameraPos", camera.Position);
+        reflectionShader->Use();
+        reflectionShader->SetVec3("cameraPos", camera.Position);
 
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
         backpack.position = glm::vec3(-14.0f, 1.0f, -12.0f);
         backpack.Draw(reflectionShader);
 
-        refractionShader.Use();
-        refractionShader.SetVec3("cameraPos", camera.Position);
+        refractionShader->Use();
+        refractionShader->SetVec3("cameraPos", camera.Position);
 
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
         backpack.position = glm::vec3(-8.0f, 1.0f, -12.0f);
@@ -198,7 +216,7 @@ int main()
         */
         glDisable(GL_CULL_FACE);
 
-        solidColorShader.Use();
+        solidColorShader->Use();
         pointLightCollection.DrawAll(solidColorShader);
 
         glEnable(GL_CULL_FACE);
@@ -208,7 +226,7 @@ int main()
         */
         glDepthFunc(GL_LEQUAL);
 
-        skyboxShader.Use();
+        skyboxShader->Use();
 
         Shader::SetViewMatrixUniformBuffer(uboMatrices, glm::mat4(glm::mat3(view)));
         glBindVertexArray(skyboxVAO);
@@ -221,8 +239,8 @@ int main()
         /*
         * Draw transparent objects
         */
-        windowShader.Use();
-        windowShader.SetInt("texture1", 0);
+        windowShader->Use();
+        windowShader->SetInt("texture1", 0);
 
         glBindVertexArray(windowVAO);
         glDisable(GL_CULL_FACE);
@@ -231,20 +249,20 @@ int main()
         glBindTexture(GL_TEXTURE_2D, windowTexture);
 
         std::map<float, glm::vec3> sorted;
-        for (unsigned int i = 0; i < windows.size(); i++)
+        for (glm::vec3 windowObject : windowObjects)
         {
-            float distance = glm::length(camera.Position - windows[i]);
-            sorted[distance] = windows[i];
+            float distance = glm::length(camera.Position - windowObject);
+            sorted[distance] = windowObject;
         }
 
-        for (std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); it++)
+        for (std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it)
         {
             model = glm::mat4(1.0f);
             model = glm::translate(model, it->second);
             model = glm::scale(model, glm::vec3(3.0f));
 
-            windowShader.SetMat4("model", model);
-            glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, 0);
+            windowShader->SetMat4("model", model);
+            glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
         }
 
         glEnable(GL_CULL_FACE);
@@ -260,14 +278,14 @@ int main()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        screenSpaceShader.Use();
+        screenSpaceShader->Use();
         glBindVertexArray(screenVAO);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
 
-        glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, nullptr);
 
         glEnable(GL_CULL_FACE);
 
@@ -289,13 +307,13 @@ void ProcessInput(GLFWwindow* window)
     bool tripleSpeed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(Camera_Movement::FORWARD, deltaTime, tripleSpeed);
+        camera.ProcessKeyboard(FORWARD, deltaTime, tripleSpeed);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(Camera_Movement::LEFT, deltaTime, tripleSpeed);
+        camera.ProcessKeyboard(LEFT, deltaTime, tripleSpeed);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(Camera_Movement::BACKWARD, deltaTime, tripleSpeed);
+        camera.ProcessKeyboard(BACKWARD, deltaTime, tripleSpeed);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(Camera_Movement::RIGHT, deltaTime, tripleSpeed);
+        camera.ProcessKeyboard(RIGHT, deltaTime, tripleSpeed);
 }
 
 void MouseCallback(GLFWwindow* window, double xpos, double ypos)
@@ -338,7 +356,7 @@ void SetupFramebuffer()
 
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen_width, screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen_width, screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);

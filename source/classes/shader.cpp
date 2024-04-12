@@ -92,15 +92,6 @@ Shader::~Shader()
     glDeleteProgram(ID);
 }
 
-void Shader::BindUniformBuffer(std::vector<Shader*> shaders, const char* blockLayoutName, unsigned int bindingPointIndex)
-{
-    for (Shader* shader : shaders)
-    {
-        unsigned int uniformBlockIndex = glGetUniformBlockIndex(shader->ID, blockLayoutName);
-        glUniformBlockBinding(shader->ID, uniformBlockIndex, bindingPointIndex);
-    }
-}
-
 void Shader::FillMatricesUniformBuffer(unsigned int uboMatrices, glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
@@ -123,7 +114,7 @@ void Shader::SetProjectionMatrixUniformBuffer(unsigned int uboMatrices, glm::mat
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Shader::Use()
+void Shader::Use() const
 {
     glUseProgram(ID);
 }

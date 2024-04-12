@@ -33,7 +33,7 @@ void Mesh::SetupMesh()
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TextureCoordinates));
 }
 
-void Mesh::Draw(Shader& shader)
+void Mesh::Draw(Shader* shader)
 {
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
@@ -50,7 +50,7 @@ void Mesh::Draw(Shader& shader)
         else
             number = std::to_string(specularNr++);
 
-        shader.SetInt("material." + name + number, i);
+        shader->SetInt("material." + name + number, i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);

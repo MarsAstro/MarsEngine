@@ -7,39 +7,16 @@ Model::Model(const char* path)
     LoadModel(path);
 }
 
-void Model::Draw(Shader& shader)
+void Model::Draw(Shader* shader)
 {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::scale(model, scale);
 
-    shader.SetMat4("model", model);
+    shader->SetMat4("model", model);
 
     for (unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].Draw(shader);
-}
-
-void Model::Draw_outline(Shader& shader, glm::vec3 color, float thickness)
-{
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilMask(0xFF);
-    Draw(shader);
-
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilMask(0x00);
-    glDisable(GL_DEPTH_TEST);
-
-    Shader solidColorShader = Shader("default.vert", "solid_color.frag");
-    solidColorShader.Use();
-    solidColorShader.SetVec3("objectColor", color);
-
-    scale = glm::vec3(1 + (thickness * .01f));
-    Draw(solidColorShader);
-    scale = glm::vec3(1.0f);
-
-    glStencilMask(0xFF);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glEnable(GL_DEPTH_TEST);
 }
 
 void Model::LoadModel(std::string path)

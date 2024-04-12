@@ -11,8 +11,7 @@ class Model
 {
 public:
     explicit Model(const char* path);
-    void Draw(Shader& shader);
-    void Draw_outline(Shader& shader, glm::vec3 color, float thickness);
+    void Draw(Shader* shader);
 
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 rotation = glm::vec3(0.0f);

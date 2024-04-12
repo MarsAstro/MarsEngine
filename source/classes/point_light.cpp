@@ -7,13 +7,15 @@
 
 using std::string;
 
-PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic)
+PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel,
+                       float constant, float linear, float quadratic)
 {
     CreateOriginCube(0.025f, VAO, VBO);
     PointLight(position, color, ambientLevel, diffuseLevel, specularLevel, constant, linear, quadratic, VAO);
 }
 
-PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic, unsigned int VAO)
+PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel,
+                       float constant, float linear, float quadratic, unsigned int VAO)
 {
     this->position = position;
     this->color = color;
@@ -31,7 +33,7 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, 
     VBO = VAO;
 }
 
-void PointLight::UpdateShader(Shader& shader, glm::mat4 viewMatrix, int index)
+void PointLight::UpdateShader(Shader* shader, glm::mat4 viewMatrix, int index) const
 {
     string prefix = "pointLight.";
 
@@ -40,24 +42,24 @@ void PointLight::UpdateShader(Shader& shader, glm::mat4 viewMatrix, int index)
 
     glm::vec3 viewSpacePosition = glm::vec3(viewMatrix * glm::vec4(position, 1.0f));
 
-    shader.SetVec3(prefix + "position", viewSpacePosition);
+    shader->SetVec3(prefix + "position", viewSpacePosition);
 
-    shader.SetVec3(prefix + "ambient", ambient);
-    shader.SetVec3(prefix + "diffuse", diffuse);
-    shader.SetVec3(prefix + "specular", specular);
+    shader->SetVec3(prefix + "ambient", ambient);
+    shader->SetVec3(prefix + "diffuse", diffuse);
+    shader->SetVec3(prefix + "specular", specular);
 
-    shader.SetFloat(prefix + "constant", constant);
-    shader.SetFloat(prefix + "linear", linear);
-    shader.SetFloat(prefix + "quadratic", quadratic);
+    shader->SetFloat(prefix + "constant", constant);
+    shader->SetFloat(prefix + "linear", linear);
+    shader->SetFloat(prefix + "quadratic", quadratic);
 }
 
-void PointLight::Draw(Shader& shader)
+void PointLight::Draw(Shader* shader) const
 {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
 
-    shader.SetMat4("model", model);
-    shader.SetVec3("objectColor", color);
+    shader->SetMat4("model", model);
+    shader->SetVec3("objectColor", color);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);

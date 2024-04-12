@@ -18,8 +18,8 @@ struct PointLightCollection
     void SetLightSettings(glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic);
     void AddLightAtPosition(glm::vec3 position);
 
-    void UpdateShader(Shader& shader, glm::mat4 viewMatrix);
-    void DrawAll(Shader& shader);
+    void UpdateShader(Shader* shader, glm::mat4 viewMatrix);
+    void DrawAll(Shader* shader);
 
     vector<PointLight> lights;
 

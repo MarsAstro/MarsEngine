@@ -27,9 +27,9 @@ void PointLightCollection::AddLightAtPosition(glm::vec3 position)
     lights.push_back(newLight);
 }
 
-void PointLightCollection::UpdateShader(Shader& shader, glm::mat4 viewMatrix)
+void PointLightCollection::UpdateShader(Shader* shader, glm::mat4 viewMatrix)
 {
-    shader.SetInt("numPointLights", lights.size());
+    shader->SetInt("numPointLights", lights.size());
 
     for (unsigned int i = 0; i < lights.size(); i++)
     {
@@ -37,7 +37,7 @@ void PointLightCollection::UpdateShader(Shader& shader, glm::mat4 viewMatrix)
     }
 }
 
-void PointLightCollection::DrawAll(Shader& shader)
+void PointLightCollection::DrawAll(Shader* shader)
 {
     for (PointLight light : lights)
         light.Draw(shader);
