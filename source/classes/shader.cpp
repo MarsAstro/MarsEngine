@@ -92,28 +92,6 @@ Shader::~Shader()
     glDeleteProgram(ID);
 }
 
-void Shader::FillMatricesUniformBuffer(unsigned int uboMatrices, glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
-{
-    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(viewMatrix));
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projectionMatrix));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void Shader::SetViewMatrixUniformBuffer(unsigned int uboMatrices, glm::mat4 viewMatrix)
-{
-    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(viewMatrix));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void Shader::SetProjectionMatrixUniformBuffer(unsigned int uboMatrices, glm::mat4 projectionMatrix)
-{
-    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projectionMatrix));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
 void Shader::Use() const
 {
     glUseProgram(ID);

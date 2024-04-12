@@ -20,7 +20,12 @@ public:
     Shader* CreateShader(const char* vertexPath, const char* fragmentPath);
     Shader* CreateShader(const char* vertexPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
 
+    void SetViewAndProjectionMatrices(glm::mat4 view, glm::mat4 projection) const;
+    void SetViewMatrix(glm::mat4 view) const;
+    void SetProjectionMatrix(glm::mat4 projection) const;
+
 private:
     std::vector<Shader*> shader_list;
+
     unsigned int uboMatrices;
 };

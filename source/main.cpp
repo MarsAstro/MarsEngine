@@ -28,6 +28,9 @@ void SetupFramebuffer();
 void CleanupFramebuffer();
 
 Camera camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+glm::mat4 model;
+glm::mat4 view;
+glm::mat4 projection;
 
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
@@ -53,12 +56,6 @@ int main()
     glfwSetScrollCallback(window, ScrollCallback);
 
     stbi_set_flip_vertically_on_load(true);
-
-    glm::mat4 model;
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
-                                            static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f,
-                                            100.0f);
 
     ShaderManager shaderManager = ShaderManager();
 
@@ -89,19 +86,6 @@ int main()
     Shader* screenSpaceShader    = shaderManager.CreateShader(
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
-
-    unsigned int uboMatrices;
-    glGenBuffers(1, &uboMatrices);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), nullptr, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
-
-    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     Model backpack = Model("assets/models/backpack/backpack.obj");
     Model floor = Model("assets/models/floor/floor.obj");
@@ -178,7 +162,7 @@ int main()
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screen_width) / static_cast<float>(screen_height), 0.1f, 100.0f);
 
-        Shader::FillMatricesUniformBuffer(uboMatrices, view, projection);
+        shaderManager.SetViewAndProjectionMatrices(view, projection);
 
         /*
         * Draw solid objects
@@ -228,11 +212,11 @@ int main()
 
         skyboxShader->Use();
 
-        Shader::SetViewMatrixUniformBuffer(uboMatrices, glm::mat4(glm::mat3(view)));
+        shaderManager.SetViewMatrix(glm::mat4(glm::mat3(view)));
         glBindVertexArray(skyboxVAO);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        Shader::SetViewMatrixUniformBuffer(uboMatrices, view);
+        shaderManager.SetViewMatrix(view);
 
         glDepthFunc(GL_LESS);
 

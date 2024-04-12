@@ -18,10 +18,6 @@ public:
     Shader(const char* vertexPath, const char* fragmentPath);
     ~Shader();
 
-    static void FillMatricesUniformBuffer(unsigned int uboMatrices, glm::mat4 viewMatrix, glm::mat4 projectionMatrix);
-    static void SetViewMatrixUniformBuffer(unsigned int uboMatrices, glm::mat4 viewMatrix);
-    static void SetProjectionMatrixUniformBuffer(unsigned int uboMatrices, glm::mat4 projectionMatrix);
-
     void Use() const;
 
     void SetBool(const std::string& name, bool value) const;
