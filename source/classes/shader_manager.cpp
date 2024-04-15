@@ -16,14 +16,14 @@ ShaderManager::ShaderManager()
 
 Shader* ShaderManager::CreateShader(const char *vertexPath, const char *fragmentPath)
 {
-    shaderList.emplace_back(new Shader(vertexPath, fragmentPath));
+    shaderList.push_back(std::make_unique<Shader>(vertexPath, fragmentPath));
 
     return shaderList.back().get();
 }
 
 Shader* ShaderManager::CreateShader(const char* vertexPath, const char* fragmentPath, const std::initializer_list<ShaderUniformBlock> uniformBlocks)
 {
-    shaderList.emplace_back(new Shader(vertexPath, fragmentPath));
+    shaderList.push_back(std::make_unique<Shader>(vertexPath, fragmentPath));
     Shader* newShader = shaderList.back().get();
 
     for (ShaderUniformBlock uniformBlock : uniformBlocks)
