@@ -3,7 +3,7 @@
 
 ShaderManager::ShaderManager()
 {
-    shader_list = std::vector<Shader*>();
+    shaderList = std::vector<std::unique_ptr<Shader>>();
 
     glGenBuffers(1, &uboMatrices);
 
@@ -14,26 +14,17 @@ ShaderManager::ShaderManager()
     glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
 }
 
-ShaderManager::~ShaderManager()
-{
-    for (Shader* shader : shader_list)
-    {
-        delete shader;
-    }
-}
-
 Shader* ShaderManager::CreateShader(const char *vertexPath, const char *fragmentPath)
 {
-    Shader* newShader = new Shader(vertexPath, fragmentPath);
-    shader_list.emplace_back(newShader);
+    shaderList.emplace_back(new Shader(vertexPath, fragmentPath));
 
-    return shader_list.back();
+    return shaderList.back().get();
 }
 
 Shader* ShaderManager::CreateShader(const char* vertexPath, const char* fragmentPath, const std::initializer_list<ShaderUniformBlock> uniformBlocks)
 {
-    Shader* newShader = new Shader(vertexPath, fragmentPath);
-    shader_list.emplace_back(newShader);
+    shaderList.emplace_back(new Shader(vertexPath, fragmentPath));
+    Shader* newShader = shaderList.back().get();
 
     for (ShaderUniformBlock uniformBlock : uniformBlocks)
     {
@@ -41,7 +32,7 @@ Shader* ShaderManager::CreateShader(const char* vertexPath, const char* fragment
         glUniformBlockBinding(newShader->ID, uniformBlockIndex, uniformBlock);
     }
 
-    return shader_list.back();
+    return newShader;
 }
 
 const char * ShaderManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock)

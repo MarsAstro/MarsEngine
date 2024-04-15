@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "shader.h"
 
 enum ShaderUniformBlock
@@ -13,7 +14,6 @@ class ShaderManager
 {
 public:
     ShaderManager();
-    ~ShaderManager();
 
     static const char* GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock);
 
@@ -25,7 +25,7 @@ public:
     void SetProjectionMatrix(glm::mat4 projection) const;
 
 private:
-    std::vector<Shader*> shader_list;
+    std::vector<std::unique_ptr<Shader>> shaderList;
 
     unsigned int uboMatrices;
 };
