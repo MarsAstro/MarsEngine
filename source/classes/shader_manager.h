@@ -25,7 +25,11 @@ public:
     void SetProjectionMatrix(glm::mat4 projection) const;
 
 private:
-    std::vector<std::unique_ptr<Shader>> shaderList;
+    std::vector<std::unique_ptr<Shader>> mShaderList;
 
-    unsigned int uboMatrices;
+    unsigned int mUBOMatrices;
+    unsigned int mUBOPointLights;
+    unsigned int mMatricesCount = 2;
+    unsigned int mMaxPointLights = 64;
+    unsigned int mSizeOfPointLight = 20 * sizeof(float);
 };

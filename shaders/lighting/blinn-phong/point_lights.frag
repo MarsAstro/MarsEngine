@@ -4,7 +4,6 @@ struct Material {
     sampler2D texture_specular1;
     float shininess;
 };
-
 uniform Material material;
 
 struct PointLight {
@@ -19,9 +18,12 @@ struct PointLight {
     float quadratic;
 };
 
-#define NR_POINT_LIGHTS 128
-uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform int numPointLights;
+#define MAX_POINT_LIGHTS 64
+layout (std140) uniform PointLights
+{
+    PointLight pointLights[MAX_POINT_LIGHTS];
+    int numPointLights;
+};
 
 out vec4 FragmentColor;
 
@@ -38,7 +40,7 @@ void main()
 
     vec3 result = vec3(0.0);
 
-    int lightCount = min(numPointLights, NR_POINT_LIGHTS);
+    int lightCount = min(numPointLights, MAX_POINT_LIGHTS);
     for(int i = 0; i < lightCount; i++)
         result += CalculatePointLight(pointLights[i], normal, viewDirection);
 

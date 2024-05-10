@@ -29,15 +29,15 @@ struct Texture
 class Mesh
 {
 public:
-    std::vector<Vertex>			vertices;
-    std::vector<unsigned int>	indices;
-    std::vector<Texture>		textures;
+    std::vector<Vertex>			mVertices;
+    std::vector<unsigned int>	mIndices;
+    std::vector<Texture>		mTextures;
 
     Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures);
     void Draw(Shader* shader);
 
 private:
-    unsigned int VAO{}, VBO{}, EBO{};
+    unsigned int mVAO{}, mVBO{}, mEBO{};
 
     void SetupMesh();
 };

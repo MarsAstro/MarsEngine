@@ -24,15 +24,15 @@ struct PointLightCollection
     vector<PointLight> lights;
 
 private:
-    glm::vec3 color;
+    glm::vec3 mColor;
 
-    float ambientLevel;
-    float diffuseLevel;
-    float specularLevel;
+    float mAmbientLevel;
+    float mDiffuseLevel;
+    float mSpecularLevel;
 
-    float constant;
-    float linear;
-    float quadratic;
+    float mConstant;
+    float mLinear;
+    float mQuadratic;
 
-    unsigned int VAO, VBO;
+    unsigned int mVAO, mVBO;
 };

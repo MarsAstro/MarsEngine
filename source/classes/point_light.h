@@ -19,13 +19,13 @@ public:
     glm::vec3 color;
 
 private:
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    glm::vec3 mAmbient;
+    glm::vec3 mDiffuse;
+    glm::vec3 mSpecular;
 
-    float constant;
-    float linear;
-    float quadratic;
+    float mConstant;
+    float mLinear;
+    float mQuadratic;
 
-    unsigned int VAO, VBO;
+    unsigned int mVAO, mVBO;
 };

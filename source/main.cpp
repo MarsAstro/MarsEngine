@@ -17,8 +17,8 @@
 
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 900;
-int screen_width = SCREEN_WIDTH;
-int screen_height = SCREEN_HEIGHT;
+int screenWidth = SCREEN_WIDTH;
+int screenHeight = SCREEN_HEIGHT;
 
 void ProcessInput(GLFWwindow* window);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
@@ -62,7 +62,7 @@ int main()
     Shader* objectShader         = shaderManager.CreateShader(
         "shaders/general/default.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
-        { Matrices });
+        { Matrices, PointLights });
     Shader* windowShader         = shaderManager.CreateShader(
         "shaders/general/default.vert",
         "shaders/general/transparent_texture.frag",
@@ -120,9 +120,9 @@ int main()
             1.0f, 0.045f, 0.0075f
     );
 
-    pointLightCollection.AddLightAtPosition(glm::vec3(1.2f, 1.0f, 2.0f));
-    pointLightCollection.AddLightAtPosition(glm::vec3(1.2f, 1.0f, 2.0f));
-    pointLightCollection.AddLightAtPosition(glm::vec3(-15.0f, -1.0f, -15.0f));
+    pointLightCollection.AddLightAtPosition(glm::vec3(0.0f, 0.5f, 0.5f));
+    //pointLightCollection.AddLightAtPosition(glm::vec3(1.2f, 1.0f, 2.0f));
+    //pointLightCollection.AddLightAtPosition(glm::vec3(-15.0f, -1.0f, -15.0f));
 
     vector<glm::vec3> windowObjects;
     windowObjects.emplace_back(0.0f, -1.0f, -5.0f);
@@ -160,7 +160,7 @@ int main()
         ProcessInput(window);
 
         view = camera.GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screen_width) / static_cast<float>(screen_height), 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
         shaderManager.SetViewAndProjectionMatrices(view, projection);
 
@@ -170,9 +170,8 @@ int main()
         objectShader->Use();
         objectShader->SetFloat("material.shininess", 64.0f);
 
-        pointLightCollection.lights[0].position = glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f);
-        pointLightCollection.lights[1].position = glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0);
-        pointLightCollection.UpdateShader(objectShader, view);
+        // pointLightCollection.lights[0].position = glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f);
+        // pointLightCollection.lights[1].position = glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0);
 
         backpack.Draw(objectShader);
         floor.Draw(objectShader);
@@ -326,8 +325,8 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 
-    screen_width = width;
-    screen_height = height;
+    screenWidth = width;
+    screenHeight = height;
 
     CleanupFramebuffer();
     SetupFramebuffer();
@@ -340,7 +339,7 @@ void SetupFramebuffer()
 
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen_width, screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -348,7 +347,7 @@ void SetupFramebuffer()
 
     glGenRenderbuffers(1, &renderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_width, screen_height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
 

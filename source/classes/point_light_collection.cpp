@@ -8,22 +8,22 @@ PointLightCollection::PointLightCollection(glm::vec3 color, float ambientLevel, 
 
 void PointLightCollection::SetLightSettings(glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic)
 {
-    this->color = color;
+    this->mColor = color;
 
-    this->ambientLevel = ambientLevel;
-    this->diffuseLevel = diffuseLevel;
-    this->specularLevel = specularLevel;
+    this->mAmbientLevel = ambientLevel;
+    this->mDiffuseLevel = diffuseLevel;
+    this->mSpecularLevel = specularLevel;
 
-    this->constant = constant;
-    this->linear = linear;
-    this->quadratic = quadratic;
+    this->mConstant = constant;
+    this->mLinear = linear;
+    this->mQuadratic = quadratic;
 
-    CreateOriginCube(0.025f, VAO, VBO);
+    CreateOriginCube(0.025f, mVAO, mVBO);
 }
 
 void PointLightCollection::AddLightAtPosition(glm::vec3 position)
 {
-    PointLight newLight = PointLight(position, color, ambientLevel, diffuseLevel, specularLevel, constant, linear, quadratic, VAO);
+    PointLight newLight = PointLight(position, mColor, mAmbientLevel, mDiffuseLevel, mSpecularLevel, mConstant, mLinear, mQuadratic, mVAO);
     lights.push_back(newLight);
 }
 

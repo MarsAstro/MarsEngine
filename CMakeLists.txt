@@ -37,9 +37,24 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/classes/shader_manager.h)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
-file(COPY assets DESTINATION .)
-file(COPY shaders DESTINATION .)
 
+#Symbolic link between source asset/shader files for easier development
+add_custom_command(TARGET ${PROJECT_NAME}
+    PRE_BUILD COMMAND
+    ${CMAKE_COMMAND} -E create_symlink
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders
+)
+add_custom_command(TARGET ${PROJECT_NAME}
+        PRE_BUILD COMMAND
+        ${CMAKE_COMMAND} -E create_symlink
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+)
+
+#Replace symlink custom commands with this line if symbolic links don't work on your machine
+#file(COPY assets DESTINATION .)
+#file(COPY shaders DESTINATION .)
 
 # Library linking
 target_link_libraries(${CMAKE_PROJECT_NAME} glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
