@@ -32,7 +32,7 @@ ShaderManager::ShaderManager()
     glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(glm::vec3(0.5f)));
     glBufferSubData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::vec4), sizeof(glm::vec3), glm::value_ptr(glm::vec3(1.0f)));
 
-    unsigned int vecOffsets = 4 * sizeof(glm::vec4);
+    unsigned int vecOffsets = 3 * sizeof(glm::vec4) + sizeof(glm::vec3);
     glBufferSubData(GL_UNIFORM_BUFFER, vecOffsets + 0 * sizeof(float), sizeof(float), static_cast<void*>(&constant));
     glBufferSubData(GL_UNIFORM_BUFFER, vecOffsets + 1 * sizeof(float), sizeof(float), static_cast<void*>(&linear));
     glBufferSubData(GL_UNIFORM_BUFFER, vecOffsets + 2 * sizeof(float), sizeof(float), static_cast<void*>(&quadratic));
