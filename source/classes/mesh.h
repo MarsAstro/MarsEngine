@@ -3,14 +3,11 @@
 #include <string>
 #include <vector>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-#include "shader.h"
+#include "shader_program.h"
 
 struct Vertex
 {
@@ -34,7 +31,7 @@ public:
     std::vector<Texture>		mTextures;
 
     Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures);
-    void Draw(Shader* shader);
+    void Draw(Shading::ShaderProgram* shader);
 
 private:
     unsigned int mVAO{}, mVBO{}, mEBO{};

@@ -1,5 +1,8 @@
 #include "mesh.h"
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures)
 {
     this->mVertices = vertices;
@@ -33,7 +36,7 @@ void Mesh::SetupMesh()
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TextureCoordinates));
 }
 
-void Mesh::Draw(Shader* shader)
+void Mesh::Draw(Shading::ShaderProgram* shader)
 {
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;

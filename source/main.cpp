@@ -9,11 +9,13 @@
 
 #include "stb_image.h"
 #include "functions.h"
-#include "classes/shader.h"
 #include "classes/camera.h"
 #include "classes/model.h"
 #include "classes/point_light_collection.h"
 #include "classes/shader_manager.h"
+
+using Shading::ShaderManager;
+using Shading::ShaderProgram;
 
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 900;
@@ -59,31 +61,31 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    Shader* objectShader         = shaderManager.CreateShader(
+    ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
-        { Matrices, PointLights });
-    Shader* windowShader         = shaderManager.CreateShader(
+        { Shading::Matrices, Shading::PointLights });
+    ShaderProgram* windowShader         = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/transparent_texture.frag",
-        { Matrices });
-    Shader* solidColorShader     = shaderManager.CreateShader(
+        { Shading::Matrices });
+    ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/solid_color.frag",
-        { Matrices });
-    Shader* reflectionShader     = shaderManager.CreateShader(
+        { Shading::Matrices });
+    ShaderProgram* reflectionShader     = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/skybox_reflection.frag",
-        { Matrices });
-    Shader* refractionShader     = shaderManager.CreateShader(
+        { Shading::Matrices });
+    ShaderProgram* refractionShader     = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/skybox_refraction.frag",
-        { Matrices });
-    Shader* skyboxShader         = shaderManager.CreateShader(
+        { Shading::Matrices });
+    ShaderProgram* skyboxShader         = shaderManager.CreateShaderProgram(
         "shaders/general/skybox.vert",
         "shaders/general/skybox.frag",
-        { Matrices });
-    Shader* screenSpaceShader    = shaderManager.CreateShader(
+        { Shading::Matrices });
+    ShaderProgram* screenSpaceShader    = shaderManager.CreateShaderProgram(
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
 
@@ -172,6 +174,8 @@ int main()
 
         // pointLightCollection.lights[0].position = glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f);
         // pointLightCollection.lights[1].position = glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0);
+
+        shaderManager.UpdatePointLights(view);
 
         backpack.Draw(objectShader);
         floor.Draw(objectShader);

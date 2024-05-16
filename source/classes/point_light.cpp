@@ -33,7 +33,7 @@ PointLight::PointLight(glm::vec3 position, glm::vec3 color, float ambientLevel, 
     mVBO = VAO;
 }
 
-void PointLight::UpdateShader(Shader* shader, glm::mat4 viewMatrix, int index) const
+void PointLight::UpdateShader(Shading::ShaderProgram* shader, glm::mat4 viewMatrix, int index) const
 {
     string prefix = "pointLight.";
 
@@ -53,7 +53,7 @@ void PointLight::UpdateShader(Shader* shader, glm::mat4 viewMatrix, int index) c
     shader->SetFloat(prefix + "quadratic", mQuadratic);
 }
 
-void PointLight::Draw(Shader* shader) const
+void PointLight::Draw(Shading::ShaderProgram* shader) const
 {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);

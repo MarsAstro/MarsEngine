@@ -18,8 +18,8 @@ include_directories(libraries/glm)
 
 set(ASSIMP_BUILD_STATIC_LIB ON)
 set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
-        source/classes/shader.cpp
-        source/classes/shader.h
+        source/classes/shader_program.cpp
+        source/classes/shader_program.h
         source/classes/mesh.cpp
         source/classes/mesh.h
         source/classes/model.cpp
@@ -34,7 +34,9 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/classes/point_light_collection.h
         libraries/stb_image.cpp
         source/classes/shader_manager.cpp
-        source/classes/shader_manager.h)
+        source/classes/shader_manager.h
+        source/classes/light_manager.cpp
+        source/classes/light_manager.h)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 

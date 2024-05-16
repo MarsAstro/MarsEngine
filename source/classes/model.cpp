@@ -1,5 +1,9 @@
 #include "model.h"
 
+#include <iostream>
+#include <assimp/postprocess.h>
+#include <glad/glad.h>
+
 #include "stb_image.h"
 
 Model::Model(const char* path)
@@ -7,7 +11,7 @@ Model::Model(const char* path)
     LoadModel(path);
 }
 
-void Model::Draw(Shader* shader)
+void Model::Draw(Shading::ShaderProgram* shader)
 {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);

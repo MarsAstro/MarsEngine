@@ -2,16 +2,15 @@
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include "mesh.h"
-#include "shader.h"
+#include "shader_program.h"
 
 class Model
 {
 public:
     explicit Model(const char* path);
-    void Draw(Shader* shader);
+    void Draw(Shading::ShaderProgram* shader);
 
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 rotation = glm::vec3(0.0f);

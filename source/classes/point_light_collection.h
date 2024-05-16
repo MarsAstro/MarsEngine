@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "point_light.h"
-#include "shader.h"
+#include "shader_program.h"
 
 using std::vector;
 
@@ -18,8 +18,8 @@ struct PointLightCollection
     void SetLightSettings(glm::vec3 color, float ambientLevel, float diffuseLevel, float specularLevel, float constant, float linear, float quadratic);
     void AddLightAtPosition(glm::vec3 position);
 
-    void UpdateShader(Shader* shader, glm::mat4 viewMatrix);
-    void DrawAll(Shader* shader);
+    void UpdateShader(Shading::ShaderProgram* shader, const glm::mat4 &viewMatrix) const;
+    void DrawAll(Shading::ShaderProgram* shader) const;
 
     vector<PointLight> lights;
 

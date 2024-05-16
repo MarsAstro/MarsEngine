@@ -2,34 +2,43 @@
 
 #include <vector>
 #include <memory>
-#include "shader.h"
+#include "shader_program.h"
+#include "light_manager.h"
 
-enum ShaderUniformBlock
+namespace Shading
 {
-    Matrices = 0,
-    PointLights = 1
-};
+    enum ShaderUniformBlock
+    {
+        Matrices = 0,
+        PointLights = 1
+    };
 
-class ShaderManager
-{
-public:
-    ShaderManager();
+    class ShaderManager
+    {
+    public:
+        ShaderManager();
 
-    static const char* GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock);
+        static const char* GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock);
 
-    Shader* CreateShader(const char* vertexPath, const char* fragmentPath);
-    Shader* CreateShader(const char* vertexPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
+        ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* fragmentPath);
+        ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
 
-    void SetViewAndProjectionMatrices(glm::mat4 view, glm::mat4 projection) const;
-    void SetViewMatrix(glm::mat4 view) const;
-    void SetProjectionMatrix(glm::mat4 projection) const;
+        void SetViewAndProjectionMatrices(const glm::mat4 &view, const glm::mat4 &projection) const;
+        void SetViewMatrix(glm::mat4 view) const;
+        void SetProjectionMatrix(glm::mat4 projection) const;
+        void UpdatePointLights(const glm::mat4& view) const;
 
-private:
-    std::vector<std::unique_ptr<Shader>> mShaderList;
+        Lighting::LightManager lightManager;
 
-    unsigned int mUBOMatrices;
-    unsigned int mUBOPointLights;
-    unsigned int mMatricesCount = 2;
-    unsigned int mMaxPointLights = 64;
-    unsigned int mSizeOfPointLight = 20 * sizeof(float);
-};
+    private:
+        std::vector<std::unique_ptr<ShaderProgram>> mShaderList;
+
+        unsigned int mUBOMatrices;
+        unsigned int mUBOPointLights;
+
+        const unsigned int MATRICES_COUNT = 2;
+        const unsigned int MAX_POINT_LIGHTS = 64;
+        const unsigned int SIZEOF_POINT_LIGHT = 20 * sizeof(float);
+        const unsigned int POINT_LIGHTS_ARRAY_SIZE = MAX_POINT_LIGHTS * SIZEOF_POINT_LIGHT;
+    };
+}
