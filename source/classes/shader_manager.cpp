@@ -94,7 +94,7 @@ void ShaderManager::SetProjectionMatrix(glm::mat4 projection) const
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void ShaderManager::UpdateLights(const glm::mat4 &viewMatrix) const
+void ShaderManager::UpdateLightsBuffer(const glm::mat4 &viewMatrix) const
 {
     std::vector<Lighting::PointLight> pointLights = lightManager.GetViewSpacePointLights(viewMatrix);
     int numPointlights = lightManager.GetNumberOfPointLights();

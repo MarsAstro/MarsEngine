@@ -27,6 +27,7 @@ namespace Shading::Lighting
 
         void AddPointLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float constant, float linear, float quadratic);
         void AddPointLight(const PointLight &pointLight);
+        void MovePointLight(unsigned int index, glm::vec3 newPosition);
         void DrawPointLightCubes(ShaderProgram* shaderProgram) const;
 
         unsigned int GetNumberOfPointLights() const;

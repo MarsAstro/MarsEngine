@@ -11,7 +11,6 @@
 #include "functions.h"
 #include "classes/camera.h"
 #include "classes/model.h"
-#include "classes/point_light_collection.h"
 #include "classes/shader_manager.h"
 
 using Shading::ShaderManager;
@@ -89,8 +88,15 @@ int main()
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
 
-    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f, 0.5f, 0.5f), glm::vec3(0.05f), glm::vec3(0.5f),
-        glm::vec3(1.0f), 1.0f, 0.045f, 0.0075f);
+    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
+        glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
+        1.0f, 0.045f, 0.0075f);
+    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
+        glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
+        1.0f, 0.045f, 0.0075f);
+    shaderManager.lightManager.AddPointLight(glm::vec3(-15.0f, -1.0f, -15.0f),
+        glm::vec3(0.05f), glm::vec3(0.5f),glm::vec3(1.0f),
+        1.0f, 0.045f, 0.0075f);
 
     Model backpack = Model("assets/models/backpack/backpack.obj");
     Model floor = Model("assets/models/floor/floor.obj");
@@ -158,7 +164,10 @@ int main()
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
         shaderManager.SetViewAndProjectionMatrices(view, projection);
-        shaderManager.UpdateLights(view);
+
+        shaderManager.lightManager.MovePointLight(0, glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f));
+        shaderManager.lightManager.MovePointLight(1, glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0));
+        shaderManager.UpdateLightsBuffer(view);
 
         /*
         * Draw solid objects

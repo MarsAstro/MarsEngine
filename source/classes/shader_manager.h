@@ -26,7 +26,7 @@ namespace Shading
         void SetViewAndProjectionMatrices(const glm::mat4 &view, const glm::mat4 &projection) const;
         void SetViewMatrix(glm::mat4 view) const;
         void SetProjectionMatrix(glm::mat4 projection) const;
-        void UpdateLights(const glm::mat4& viewMatrix) const;
+        void UpdateLightsBuffer(const glm::mat4& viewMatrix) const;
 
     private:
         std::vector<std::unique_ptr<ShaderProgram>> mShaderProgramList;

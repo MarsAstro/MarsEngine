@@ -41,6 +41,14 @@ void LightManager::AddPointLight(const PointLight &pointLight)
     pointLights[mNumPointLights++] = pointLight;
 }
 
+void LightManager::MovePointLight(unsigned int index, glm::vec3 newPosition)
+{
+    if (index >= mNumPointLights)
+        return;
+
+    pointLights[index].position = glm::vec4(newPosition, 1.0f);
+}
+
 void LightManager::DrawPointLightCubes(ShaderProgram *shaderProgram) const
 {
     for (int i = 0; i < mNumPointLights; ++i)
