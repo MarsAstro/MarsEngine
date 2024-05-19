@@ -166,7 +166,7 @@ int main()
         objectShader->Use();
         objectShader->SetFloat("material.shininess", 64.0f);
 
-        backpack.Draw(objectShader);
+        backpack.Draw(objectShader); 
         floor.Draw(objectShader);
 
         /*
