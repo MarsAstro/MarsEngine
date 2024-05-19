@@ -10,7 +10,7 @@ using Shading::Lighting::LightManager;
 LightManager::LightManager(unsigned int maxPointLights)
 {
     pointLights.resize(maxPointLights);
-    CreateOriginCube(0.025f, mVAO, mVBO);
+    CreateCube(0.025f, mVAO, mVBO);
 }
 
 void LightManager::AddPointLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular,

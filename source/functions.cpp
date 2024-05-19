@@ -58,7 +58,7 @@ void CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigne
     glEnableVertexAttribArray(2);
 }
 
-void CreateOriginCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
+void CreateCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
 {
     float vertices[] = {
             -sideLength, -sideLength, -sideLength, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
