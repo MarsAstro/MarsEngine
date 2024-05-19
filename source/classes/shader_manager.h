@@ -26,12 +26,10 @@ namespace Shading
         void SetViewAndProjectionMatrices(const glm::mat4 &view, const glm::mat4 &projection) const;
         void SetViewMatrix(glm::mat4 view) const;
         void SetProjectionMatrix(glm::mat4 projection) const;
-        void UpdatePointLights(const glm::mat4& view) const;
-
-        Lighting::LightManager lightManager;
+        void UpdateLights(const glm::mat4& viewMatrix) const;
 
     private:
-        std::vector<std::unique_ptr<ShaderProgram>> mShaderList;
+        std::vector<std::unique_ptr<ShaderProgram>> mShaderProgramList;
 
         unsigned int mUBOMatrices;
         unsigned int mUBOPointLights;
@@ -40,5 +38,8 @@ namespace Shading
         const unsigned int MAX_POINT_LIGHTS = 64;
         const unsigned int SIZEOF_POINT_LIGHT = 20 * sizeof(float);
         const unsigned int POINT_LIGHTS_ARRAY_SIZE = MAX_POINT_LIGHTS * SIZEOF_POINT_LIGHT;
+
+    public:
+        Lighting::LightManager lightManager;
     };
 }

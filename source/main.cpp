@@ -89,6 +89,9 @@ int main()
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
 
+    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f, 0.5f, 0.5f), glm::vec3(0.05f), glm::vec3(0.5f),
+        glm::vec3(1.0f), 1.0f, 0.045f, 0.0075f);
+
     Model backpack = Model("assets/models/backpack/backpack.obj");
     Model floor = Model("assets/models/floor/floor.obj");
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
@@ -115,16 +118,6 @@ int main()
     stbi_set_flip_vertically_on_load(false);
     skyboxTexture = LoadCubemap(skyboxFaces, GL_RGB, GL_RGB);
     stbi_set_flip_vertically_on_load(true);
-
-    PointLightCollection pointLightCollection = PointLightCollection(
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            0.05f, 0.5f, 1.0f,
-            1.0f, 0.045f, 0.0075f
-    );
-
-    pointLightCollection.AddLightAtPosition(glm::vec3(0.0f, 0.5f, 0.5f));
-    //pointLightCollection.AddLightAtPosition(glm::vec3(1.2f, 1.0f, 2.0f));
-    //pointLightCollection.AddLightAtPosition(glm::vec3(-15.0f, -1.0f, -15.0f));
 
     vector<glm::vec3> windowObjects;
     windowObjects.emplace_back(0.0f, -1.0f, -5.0f);
@@ -165,17 +158,13 @@ int main()
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
         shaderManager.SetViewAndProjectionMatrices(view, projection);
+        shaderManager.UpdateLights(view);
 
         /*
         * Draw solid objects
         */
         objectShader->Use();
         objectShader->SetFloat("material.shininess", 64.0f);
-
-        // pointLightCollection.lights[0].position = glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f);
-        // pointLightCollection.lights[1].position = glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0);
-
-        shaderManager.UpdatePointLights(view);
 
         backpack.Draw(objectShader);
         floor.Draw(objectShader);
@@ -204,7 +193,6 @@ int main()
         glDisable(GL_CULL_FACE);
 
         solidColorShader->Use();
-        pointLightCollection.DrawAll(solidColorShader);
 
         glEnable(GL_CULL_FACE);
 

@@ -6,10 +6,13 @@
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
 
-ShaderManager::ShaderManager()
+ShaderManager::ShaderManager() : lightManager(MAX_POINT_LIGHTS)
 {
-    mShaderList = std::vector<std::unique_ptr<ShaderProgram>>();
+    mShaderProgramList = std::vector<std::unique_ptr<ShaderProgram> >();
 
+    /*
+     * Create Matrices buffer
+     */
     glGenBuffers(1, &mUBOMatrices);
 
     unsigned int matricesSize = MATRICES_COUNT * sizeof(glm::mat4);
@@ -19,6 +22,9 @@ ShaderManager::ShaderManager()
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, mUBOMatrices);
 
+    /*
+     * Create Lights buffer
+     */
     glGenBuffers(1, &mUBOPointLights);
 
     unsigned int pointlightsSize = POINT_LIGHTS_ARRAY_SIZE + sizeof(int);
@@ -31,15 +37,15 @@ ShaderManager::ShaderManager()
 
 ShaderProgram* ShaderManager::CreateShaderProgram(const char *vertexPath, const char *fragmentPath)
 {
-    mShaderList.push_back(std::make_unique<ShaderProgram>(vertexPath, fragmentPath));
+    mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, fragmentPath));
 
-    return mShaderList.back().get();
+    return mShaderProgramList.back().get();
 }
 
 ShaderProgram* ShaderManager::CreateShaderProgram(const char* vertexPath, const char* fragmentPath, const std::initializer_list<ShaderUniformBlock> uniformBlocks)
 {
-    mShaderList.push_back(std::make_unique<ShaderProgram>(vertexPath, fragmentPath));
-    ShaderProgram* newShader = mShaderList.back().get();
+    mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, fragmentPath));
+    ShaderProgram* newShader = mShaderProgramList.back().get();
 
     int returnValue;
     glGetProgramiv(newShader->mID, GL_ACTIVE_UNIFORM_BLOCKS, &returnValue);
@@ -88,21 +94,13 @@ void ShaderManager::SetProjectionMatrix(glm::mat4 projection) const
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void ShaderManager::UpdatePointLights(const glm::mat4 &view) const
+void ShaderManager::UpdateLights(const glm::mat4 &viewMatrix) const
 {
-    Lighting::PointLight pointLight { glm::vec4(view * glm::vec4(0.0f, 0.5f, 0.5f, 1.0f)),
-        glm::vec4(0.05f),
-        glm::vec4(0.5f),
-        glm::vec4(1.0f),
-        1.0f,
-        0.045f,
-        0.0075f
-    };
+    std::vector<Lighting::PointLight> pointLights = lightManager.GetViewSpacePointLights(viewMatrix);
+    int numPointlights = lightManager.GetNumberOfPointLights();
 
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOPointLights);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, SIZEOF_POINT_LIGHT, &pointLight);
-
-    int numPointlights = 1;
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, POINT_LIGHTS_ARRAY_SIZE, &pointLights[0]);
     glBufferSubData(GL_UNIFORM_BUFFER, POINT_LIGHTS_ARRAY_SIZE, sizeof(int), static_cast<void*>(&numPointlights));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }

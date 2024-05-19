@@ -20,6 +20,19 @@ namespace Shading::Lighting
 
     class LightManager
     {
+    public:
+        explicit LightManager(unsigned int maxPointLights);
+
+        void AddPointLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float constant, float linear, float quadratic);
+        void AddPointLight(const PointLight &pointLight);
+
+        unsigned int GetNumberOfPointLights() const;
+        std::vector<PointLight> GetViewSpacePointLights(const glm::mat4& viewMatrix) const;
+
+    private:
         std::vector<PointLight> pointLights;
+
+        unsigned int mNumPointLights = 0;
+        unsigned int mVAO, mVBO;
     };
 }
