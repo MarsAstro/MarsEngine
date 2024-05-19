@@ -28,10 +28,6 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/functions.h
         source/classes/camera.cpp
         source/classes/camera.h
-        source/classes/point_light.cpp
-        source/classes/point_light.h
-        source/classes/point_light_collection.cpp
-        source/classes/point_light_collection.h
         libraries/stb_image.cpp
         source/classes/shader_manager.cpp
         source/classes/shader_manager.h

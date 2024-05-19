@@ -166,7 +166,7 @@ int main()
         objectShader->Use();
         objectShader->SetFloat("material.shininess", 64.0f);
 
-        backpack.Draw(objectShader); 
+        backpack.Draw(objectShader);
         floor.Draw(objectShader);
 
         /*
@@ -193,6 +193,7 @@ int main()
         glDisable(GL_CULL_FACE);
 
         solidColorShader->Use();
+        shaderManager.lightManager.DrawPointLightCubes(solidColorShader);
 
         glEnable(GL_CULL_FACE);
 

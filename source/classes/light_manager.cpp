@@ -1,4 +1,8 @@
 #include "light_manager.h"
+
+#include <ext/matrix_transform.hpp>
+#include <glad/glad.h>
+
 #include "../functions.h"
 
 using Shading::Lighting::LightManager;
@@ -35,6 +39,23 @@ void LightManager::AddPointLight(const PointLight &pointLight)
         return;
 
     pointLights[mNumPointLights++] = pointLight;
+}
+
+void LightManager::DrawPointLightCubes(ShaderProgram *shaderProgram) const
+{
+    for (int i = 0; i < mNumPointLights; ++i)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(pointLights[i].position));
+
+        glm::vec3 diffuse = glm::vec3(pointLights[i].diffuse);
+        glm::vec3 color = (1.0f / diffuse) * diffuse;
+        shaderProgram->SetMat4("model", model);
+        shaderProgram->SetVec3("objectColor", color);
+
+        glBindVertexArray(mVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 }
 
 unsigned int LightManager::GetNumberOfPointLights() const
