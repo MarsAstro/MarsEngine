@@ -21,6 +21,9 @@ constexpr int SCREEN_HEIGHT = 900;
 int screenWidth = SCREEN_WIDTH;
 int screenHeight = SCREEN_HEIGHT;
 
+void MainScene(GLFWwindow *window, ShaderManager shaderManager);
+void TestScene(GLFWwindow *window, ShaderManager shaderManager);
+
 void ProcessInput(GLFWwindow* window);
 void MouseCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
@@ -60,6 +63,15 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
+    //MainScene(window, shaderManager);
+    TestScene(window, shaderManager);
+
+    glfwTerminate();
+    return 0;
+}
+
+void MainScene(GLFWwindow *window, ShaderManager shaderManager)
+{
     ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
@@ -89,14 +101,14 @@ int main()
         "shaders/post_processing/default_screen_space.frag");
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
-        glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
-        1.0f, 0.045f, 0.0075f);
+                                             glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
+                                             1.0f, 0.045f, 0.0075f);
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
-        glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
-        1.0f, 0.045f, 0.0075f);
+                                             glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
+                                             1.0f, 0.045f, 0.0075f);
     shaderManager.lightManager.AddPointLight(glm::vec3(-15.0f, -1.0f, -15.0f),
-        glm::vec3(0.05f), glm::vec3(0.5f),glm::vec3(1.0f),
-        1.0f, 0.045f, 0.0075f);
+                                             glm::vec3(0.05f), glm::vec3(0.5f),glm::vec3(1.0f),
+                                             1.0f, 0.045f, 0.0075f);
 
     Model backpack = Model("assets/models/backpack/backpack.obj");
     Model floor = Model("assets/models/floor/floor.obj");
@@ -279,9 +291,18 @@ int main()
     }
 
     CleanupFramebuffer();
+}
 
-    glfwTerminate();
-    return 0;
+void TestScene(GLFWwindow *window, ShaderManager shaderManager)
+{
+    while (!glfwWindowShouldClose(window))
+    {
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+    }
 }
 
 void ProcessInput(GLFWwindow* window)
