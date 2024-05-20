@@ -6,18 +6,19 @@
 #include <vector>
 
 #include "stb_image.h"
+#include "utility.h"
 
 using std::vector;
 using std::string;
 
-float clamp(float d, float min, float max) {
+float Utility::Clamp(float d, float min, float max) {
     const float t = d < min ? min : d;
     return t > max ? max : t;
 }
 
-void CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
+void Utility::CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
 {
-    fillLevel = clamp(fillLevel, 0.0f, 1.0f);
+    fillLevel = Clamp(fillLevel, 0.0f, 1.0f);
 
     float vertices[] =
             {
@@ -58,7 +59,7 @@ void CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigne
     glEnableVertexAttribArray(2);
 }
 
-void CreateCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
+void Utility::CreateCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
 {
     float vertices[] = {
             -sideLength, -sideLength, -sideLength, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
@@ -122,7 +123,7 @@ void CreateCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
     glEnableVertexAttribArray(2);
 }
 
-void CreateSkyboxCube(unsigned int& VAO)
+void Utility::CreateSkyboxCube(unsigned int& VAO)
 {
     float skyboxVertices[] = {
             -1.0f,  1.0f, -1.0f,
@@ -181,9 +182,9 @@ void CreateSkyboxCube(unsigned int& VAO)
     glEnableVertexAttribArray(0);
 }
 
-void CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
+void Utility::CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
 {
-    fillLevel = clamp(fillLevel, 0.0f, 1.0f);
+    fillLevel = Clamp(fillLevel, 0.0f, 1.0f);
 
     float vertices[] =
             {
@@ -222,7 +223,7 @@ void CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsig
     glEnableVertexAttribArray(2);
 }
 
-unsigned int LoadTexture(const char* texturePath, GLenum internalFormat, GLenum outputFormat, GLenum wrapFormat)
+unsigned int Utility::LoadTexture(const char* texturePath, GLenum internalFormat, GLenum outputFormat, GLenum wrapFormat)
 {
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -252,7 +253,7 @@ unsigned int LoadTexture(const char* texturePath, GLenum internalFormat, GLenum 
     return texture;
 }
 
-unsigned int LoadCubemap(vector<string> faces, GLenum internalFormat, GLenum outputFormat)
+unsigned int Utility::LoadCubemap(std::vector<std::string> faces, GLenum internalFormat, GLenum outputFormat)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -288,7 +289,7 @@ unsigned int LoadCubemap(vector<string> faces, GLenum internalFormat, GLenum out
     return textureID;
 }
 
-GLFWwindow* SetupGLFWWindow(int windowWith, int windowHeight, const char* title)
+GLFWwindow* Utility::SetupGLFWWindow(int windowWith, int windowHeight, const char* title)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -309,7 +310,7 @@ GLFWwindow* SetupGLFWWindow(int windowWith, int windowHeight, const char* title)
     return window;
 }
 
-int InitializeGLADLoader()
+int Utility::InitializeGLADLoader()
 {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {

@@ -8,8 +8,6 @@ using Shading::ShaderProgram;
 
 ShaderManager::ShaderManager() : lightManager(MAX_POINT_LIGHTS)
 {
-    mShaderProgramList = std::vector<std::unique_ptr<ShaderProgram> >();
-
     /*
      * Create Matrices buffer
      */

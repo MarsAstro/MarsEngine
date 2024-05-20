@@ -24,8 +24,8 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/classes/mesh.h
         source/classes/model.cpp
         source/classes/model.h
-        source/functions.cpp
-        source/functions.h
+        source/utility.cpp
+        source/utility.h
         source/classes/camera.cpp
         source/classes/camera.h
         libraries/stb_image.cpp

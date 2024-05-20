@@ -8,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "stb_image.h"
-#include "functions.h"
+#include "utility.h"
 #include "classes/camera.h"
 #include "classes/model.h"
 #include "classes/shader_manager.h"
@@ -21,15 +21,22 @@ constexpr int SCREEN_HEIGHT = 900;
 int screenWidth = SCREEN_WIDTH;
 int screenHeight = SCREEN_HEIGHT;
 
-void MainScene(GLFWwindow *window, ShaderManager shaderManager);
-void TestScene(GLFWwindow *window, ShaderManager shaderManager);
+namespace MainFunctions
+{
+    // Scenes
+    void MainScene(GLFWwindow *window, ShaderManager& shaderManager);
+    void TestScene(GLFWwindow *window, ShaderManager& shaderManager);
 
-void ProcessInput(GLFWwindow* window);
-void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-void SetupFramebuffer();
-void CleanupFramebuffer();
+    // Input stuff
+    void ProcessInput(GLFWwindow* window);
+    void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+    void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
+    // Rendering stuff
+    void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+    void SetupFramebuffer();
+    void CleanupFramebuffer();
+}
 
 Camera camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
 glm::mat4 model;
@@ -47,30 +54,30 @@ float previousTime = 0;
 
 int main()
 {
-    GLFWwindow* window = SetupGLFWWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mars Engine");
+    GLFWwindow* window = Utility::SetupGLFWWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mars Engine");
 
-    if (window == nullptr || InitializeGLADLoader() < 0)
+    if (window == nullptr || Utility::InitializeGLADLoader() < 0)
         return -1;
 
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+    glfwSetFramebufferSizeCallback(window, MainFunctions::FramebufferSizeCallback);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, MouseCallback);
-    glfwSetScrollCallback(window, ScrollCallback);
+    glfwSetCursorPosCallback(window, MainFunctions::MouseCallback);
+    glfwSetScrollCallback(window, MainFunctions::ScrollCallback);
 
     stbi_set_flip_vertically_on_load(true);
 
     ShaderManager shaderManager = ShaderManager();
 
-    //MainScene(window, shaderManager);
-    TestScene(window, shaderManager);
+    MainFunctions::MainScene(window, shaderManager);
+    //MainFunctions::TestScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
 }
 
-void MainScene(GLFWwindow *window, ShaderManager shaderManager)
+void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
 {
     ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
@@ -115,16 +122,16 @@ void MainScene(GLFWwindow *window, ShaderManager shaderManager)
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
-    CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
-    windowTexture = LoadTexture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
+    Utility::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+    windowTexture = Utility::LoadTexture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
 
     unsigned int screenVAO, screenVBO, screenEBO, screenIndicesCount;
-    CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
+    Utility::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
 
     unsigned int skyboxVAO, skyboxTexture;
-    CreateSkyboxCube(skyboxVAO);
+    Utility::CreateSkyboxCube(skyboxVAO);
 
-    vector<string> skyboxFaces
+    std::vector<std::string> skyboxFaces
     {
         "assets/textures/yokohama/right.jpg",
         "assets/textures/yokohama/left.jpg",
@@ -134,10 +141,10 @@ void MainScene(GLFWwindow *window, ShaderManager shaderManager)
         "assets/textures/yokohama/back.jpg"
     };
     stbi_set_flip_vertically_on_load(false);
-    skyboxTexture = LoadCubemap(skyboxFaces, GL_RGB, GL_RGB);
+    skyboxTexture = Utility::LoadCubemap(skyboxFaces, GL_RGB, GL_RGB);
     stbi_set_flip_vertically_on_load(true);
 
-    vector<glm::vec3> windowObjects;
+    std::vector<glm::vec3> windowObjects;
     windowObjects.emplace_back(0.0f, -1.0f, -5.0f);
     windowObjects.emplace_back(0.0f, -1.0f,  7.0f);
 
@@ -293,19 +300,50 @@ void MainScene(GLFWwindow *window, ShaderManager shaderManager)
     CleanupFramebuffer();
 }
 
-void TestScene(GLFWwindow *window, ShaderManager shaderManager)
+void MainFunctions::TestScene(GLFWwindow* window, ShaderManager& shaderManager)
 {
+    ShaderProgram* pointsShader    = shaderManager.CreateShaderProgram(
+        "shaders/general/basic2D.vert",
+        "shaders/general/solid_color.frag");
+
+    pointsShader->SetVec3("objectColor", glm::vec3(0, 1, 0));
+
+    float points[] = {
+        -0.5f,  0.5f, // top-left
+         0.5f,  0.5f, // top-right
+         0.5f, -0.5f, // bottom-right
+        -0.5f, -0.5f  // bottom-left
+    };
+
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
     while (!glfwWindowShouldClose(window))
     {
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
         previousTime = currentTime;
 
         ProcessInput(window);
+
+        pointsShader->Use();
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_POINTS, 0, 4);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 }
 
-void ProcessInput(GLFWwindow* window)
+void MainFunctions::ProcessInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -322,7 +360,7 @@ void ProcessInput(GLFWwindow* window)
         camera.ProcessKeyboard(RIGHT, deltaTime, tripleSpeed);
 }
 
-void MouseCallback(GLFWwindow* window, double xpos, double ypos)
+void MainFunctions::MouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
     {
@@ -339,12 +377,12 @@ void MouseCallback(GLFWwindow* window, double xpos, double ypos)
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void MainFunctions::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcesMouseScroll(yoffset);
 }
 
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+void MainFunctions::FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 
@@ -355,7 +393,7 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     SetupFramebuffer();
 }
 
-void SetupFramebuffer()
+void MainFunctions::SetupFramebuffer()
 {
     glGenFramebuffers(1, &framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -380,7 +418,7 @@ void SetupFramebuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void CleanupFramebuffer()
+void MainFunctions::CleanupFramebuffer()
 {
     glDeleteFramebuffers(1, &framebuffer);
     glDeleteTextures(1, &textureColorbuffer);
