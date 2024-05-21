@@ -187,17 +187,17 @@ void Utility::CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& V
     fillLevel = Clamp(fillLevel, 0.0f, 1.0f);
 
     float vertices[] =
-            {
-                    // positions				   // colors		  // tex coords
-                    fillLevel, -fillLevel, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,	// bottom right
-                    -fillLevel, -fillLevel, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,	// bottom left
-                    0.0,        fillLevel, 0.0f,  0.0f, 0.0f, 1.0f,  0.5f, 1.0f,	// top mid
-            };
+    {
+        // positions				   // colors		  // tex coords
+        fillLevel, -fillLevel, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,	// bottom right
+        -fillLevel, -fillLevel, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,	// bottom left
+        0.0,        fillLevel, 0.0f,  0.0f, 0.0f, 1.0f,  0.5f, 1.0f,	// top mid
+    };
 
     unsigned int indices[] =
-            {
-                    0, 1, 2
-            };
+    {
+        0, 1, 2
+    };
 
     indicesCount = sizeof(indices);
 
@@ -296,8 +296,8 @@ GLFWwindow* Utility::SetupGLFWWindow(int windowWith, int windowHeight, const cha
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(windowWith, windowHeight, title, NULL, NULL);
-    if (window == NULL)
+    GLFWwindow* window = glfwCreateWindow(windowWith, windowHeight, title, nullptr, nullptr);
+    if (window == nullptr)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -305,7 +305,6 @@ GLFWwindow* Utility::SetupGLFWWindow(int windowWith, int windowHeight, const cha
     }
 
     glfwMakeContextCurrent(window);
-
 
     return window;
 }

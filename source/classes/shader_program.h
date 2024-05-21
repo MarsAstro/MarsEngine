@@ -29,6 +29,6 @@ namespace Shading
         void SetVec4(const std::string& name, glm::vec4 value) const;
         void SetVec4(const std::string& name, float x, float y, float z, float w) const;
 
-        void SetMat4(const std::string& name, glm::mat4 matrix);
+        void SetMat4(const std::string& name, glm::mat4 matrix) const;
     };
 }

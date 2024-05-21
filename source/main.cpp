@@ -303,17 +303,15 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
 void MainFunctions::TestScene(GLFWwindow* window, ShaderManager& shaderManager)
 {
     ShaderProgram* pointsShader    = shaderManager.CreateShaderProgram(
-        "shaders/general/basic2D.vert",
-        "shaders/general/pass_through.geom",
-        "shaders/general/solid_color.frag");
-
-    pointsShader->SetVec3("objectColor", glm::vec3(0, 1, 0));
+        "shaders/general/point_houses.vert",
+        "shaders/general/point_houses.geom",
+        "shaders/general/point_houses.frag");
 
     float points[] = {
-        -0.5f,  0.5f, // top-left
-         0.5f,  0.5f, // top-right
-         0.5f, -0.5f, // bottom-right
-        -0.5f, -0.5f  // bottom-left
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
+        -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
     };
 
     unsigned int VAO, VBO;
@@ -325,13 +323,16 @@ void MainFunctions::TestScene(GLFWwindow* window, ShaderManager& shaderManager)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), static_cast<void*>(nullptr));
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), reinterpret_cast<void*>(2 * sizeof(float)));
+
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
-        float currentTime = glfwGetTime();
-        deltaTime = currentTime - previousTime;
-        previousTime = currentTime;
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         ProcessInput(window);
 
