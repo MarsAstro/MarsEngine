@@ -70,8 +70,8 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    MainFunctions::MainScene(window, shaderManager);
-    //MainFunctions::TestScene(window, shaderManager);
+    //MainFunctions::MainScene(window, shaderManager);
+    MainFunctions::TestScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -304,6 +304,7 @@ void MainFunctions::TestScene(GLFWwindow* window, ShaderManager& shaderManager)
 {
     ShaderProgram* pointsShader    = shaderManager.CreateShaderProgram(
         "shaders/general/basic2D.vert",
+        "shaders/general/pass_through.geom",
         "shaders/general/solid_color.frag");
 
     pointsShader->SetVec3("objectColor", glm::vec3(0, 1, 0));

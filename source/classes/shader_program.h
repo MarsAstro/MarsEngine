@@ -11,6 +11,7 @@ namespace Shading
         unsigned int mID;
 
         ShaderProgram(const char* vertexPath, const char* fragmentPath);
+        ShaderProgram(const char* vertexPath, const char* geometryPath, const char* fragmentPath);
         ~ShaderProgram();
 
         void Use() const;

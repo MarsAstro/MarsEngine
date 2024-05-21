@@ -40,9 +40,35 @@ ShaderProgram* ShaderManager::CreateShaderProgram(const char *vertexPath, const 
     return mShaderProgramList.back().get();
 }
 
-ShaderProgram* ShaderManager::CreateShaderProgram(const char* vertexPath, const char* fragmentPath, const std::initializer_list<ShaderUniformBlock> uniformBlocks)
+ShaderProgram* ShaderManager::CreateShaderProgram(const char* vertexPath, const char* fragmentPath,
+    const std::initializer_list<ShaderUniformBlock> uniformBlocks)
 {
     mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, fragmentPath));
+    ShaderProgram* newShader = mShaderProgramList.back().get();
+
+    int returnValue;
+    glGetProgramiv(newShader->mID, GL_ACTIVE_UNIFORM_BLOCKS, &returnValue);
+
+    for (ShaderUniformBlock uniformBlock : uniformBlocks)
+    {
+        int uniformBlockIndex = glGetUniformBlockIndex(newShader->mID, GetUniformBlockLayoutName(uniformBlock));
+        glUniformBlockBinding(newShader->mID, uniformBlockIndex, uniformBlock);
+    }
+
+    return newShader;
+}
+
+ShaderProgram * ShaderManager::CreateShaderProgram(const char *vertexPath,const char *geometryPath, const char *fragmentPath)
+{
+    mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, geometryPath, fragmentPath));
+
+    return mShaderProgramList.back().get();
+}
+
+ShaderProgram * ShaderManager::CreateShaderProgram(const char *vertexPath, const char *geometryPath, const char *fragmentPath,
+    std::initializer_list<ShaderUniformBlock> uniformBlocks)
+{
+    mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, geometryPath, fragmentPath));
     ShaderProgram* newShader = mShaderProgramList.back().get();
 
     int returnValue;

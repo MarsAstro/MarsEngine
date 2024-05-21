@@ -22,6 +22,8 @@ namespace Shading
 
         ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* fragmentPath);
         ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
+        ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* geometryPath, const char* fragmentPath);
+        ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* geometryPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
 
         void SetViewAndProjectionMatrices(const glm::mat4 &view, const glm::mat4 &projection) const;
         void SetViewMatrix(glm::mat4 view) const;
