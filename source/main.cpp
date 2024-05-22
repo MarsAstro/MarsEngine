@@ -70,8 +70,7 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    //MainFunctions::MainScene(window, shaderManager);
-    MainFunctions::TestScene(window, shaderManager);
+    MainFunctions::MainScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -106,6 +105,11 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
     ShaderProgram* screenSpaceShader    = shaderManager.CreateShaderProgram(
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
+    ShaderProgram* explosionShader      = shaderManager.CreateShaderProgram(
+        "shaders/general/basic_geometry_model.vert",
+        "shaders/general/explode_object.geom",
+        "shaders/general/basic_geometry_unlit_diffuse.frag",
+        { Shading::Matrices });
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
@@ -189,8 +193,8 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
         shaderManager.UpdateLightsBuffer(view);
 
         /*
-        * Draw solid objects
-        */
+         * Draw solid objects
+         */
         objectShader->Use();
         objectShader->SetFloat("material.shininess", 64.0f);
 
@@ -198,8 +202,8 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
         floor.Draw(objectShader);
 
         /*
-        * Draw environment mapped objects
-        */
+         * Draw environment mapped objects
+         */
         reflectionShader->Use();
         reflectionShader->SetVec3("cameraPos", camera.Position);
 
@@ -216,8 +220,18 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
         backpack.position = glm::vec3(0.0f);
 
         /*
-        * Draw lightcubes
-        */
+         * Draw exploding objects
+         */
+        explosionShader->Use();
+        explosionShader->SetFloat("time", currentTime);
+
+        backpack.position = glm::vec3(-2.0f, 1.0f, -12.0f);
+        backpack.Draw(explosionShader);
+        backpack.position = glm::vec3(0.0f);
+
+        /*
+         * Draw lightcubes
+         */
         glDisable(GL_CULL_FACE);
 
         solidColorShader->Use();
@@ -308,10 +322,10 @@ void MainFunctions::TestScene(GLFWwindow* window, ShaderManager& shaderManager)
         "shaders/general/point_houses.frag");
 
     float points[] = {
-        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
-        -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 1.0f, 1.0f, 0.0f
     };
 
     unsigned int VAO, VBO;
