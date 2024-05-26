@@ -24,15 +24,19 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/classes/mesh.h
         source/classes/model.cpp
         source/classes/model.h
-        source/utility.cpp
-        source/utility.h
+        source/utility/utility_functions.cpp
+        source/utility/utility_functions.h
         source/classes/camera.cpp
         source/classes/camera.h
         libraries/stb_image.cpp
         source/classes/shader_manager.cpp
         source/classes/shader_manager.h
         source/classes/light_manager.cpp
-        source/classes/light_manager.h)
+        source/classes/light_manager.h
+        source/utility/model_loader.cpp
+        source/utility/model_loader.h
+        source/utility/mesh.cpp
+        source/utility/mesh.h)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 

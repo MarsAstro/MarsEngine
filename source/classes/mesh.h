@@ -31,10 +31,10 @@ public:
     std::vector<Texture>		mTextures;
 
     Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures);
-    void Draw(Shading::ShaderProgram* shader);
+    void Draw(const Shading::ShaderProgram* shader) const;
 
 private:
-    unsigned int mVAO{}, mVBO{}, mEBO{};
+    unsigned int mVAO, mVBO, mEBO;
 
     void SetupMesh();
 };

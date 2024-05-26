@@ -8,10 +8,12 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "stb_image.h"
-#include "utility.h"
+#include "utility/utility_functions.h"
 #include "classes/camera.h"
 #include "classes/model.h"
 #include "classes/shader_manager.h"
+#include "utility/mesh.h"
+#include "utility/model_loader.h"
 
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
@@ -24,8 +26,10 @@ int screenHeight = SCREEN_HEIGHT;
 namespace MainFunctions
 {
     // Scenes
+    void EmptyScene(GLFWwindow *window, ShaderManager& shaderManager);
     void MainScene(GLFWwindow *window, ShaderManager& shaderManager);
-    void TestScene(GLFWwindow *window, ShaderManager& shaderManager);
+    void GeometryHousesScene(GLFWwindow *window, ShaderManager& shaderManager);
+    void ObjLoader(GLFWwindow *window, ShaderManager& shaderManager);
 
     // Input stuff
     void ProcessInput(GLFWwindow* window);
@@ -70,10 +74,33 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    MainFunctions::MainScene(window, shaderManager);
+    MainFunctions::ObjLoader(window, shaderManager);
 
     glfwTerminate();
     return 0;
+}
+
+void MainFunctions::EmptyScene(GLFWwindow *window, ShaderManager &shaderManager)
+{
+    model = glm::mat4(1.0f);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+        ProcessInput(window);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
 }
 
 void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
@@ -314,7 +341,7 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
     CleanupFramebuffer();
 }
 
-void MainFunctions::TestScene(GLFWwindow* window, ShaderManager& shaderManager)
+void MainFunctions::GeometryHousesScene(GLFWwindow* window, ShaderManager& shaderManager)
 {
     ShaderProgram* pointsShader    = shaderManager.CreateShaderProgram(
         "shaders/general/point_houses.vert",
@@ -353,6 +380,55 @@ void MainFunctions::TestScene(GLFWwindow* window, ShaderManager& shaderManager)
         pointsShader->Use();
         glBindVertexArray(VAO);
         glDrawArrays(GL_POINTS, 0, 4);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+}
+
+void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
+{
+    ShaderProgram* objectShader = shaderManager.CreateShaderProgram(
+        "shaders/general/basic_temp.vert",
+        "shaders/general/basic.frag",
+        { Shading::Matrices });
+
+    Utility::Mesh cube = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/cube.obj");
+    Utility::Mesh sphere = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/sphere.obj");
+    Utility::Mesh cylinder = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/cylinder.obj");
+
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+
+        model = glm::mat4(1.0f);
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+        shaderManager.SetViewAndProjectionMatrices(view, projection);
+
+        objectShader->Use();
+
+        objectShader->SetMat4("model", model);
+        cylinder.Draw(objectShader);
+
+        model = translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0, 0.0f));
+        objectShader->SetMat4("model", model);
+        sphere.Draw(objectShader);
+
+        model = translate(glm::mat4(1.0f), glm::vec3(-4.0f, 0.0, 0.0f));
+        objectShader->SetMat4("model", model);
+        cube.Draw(objectShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

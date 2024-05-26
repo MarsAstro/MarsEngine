@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "stb_image.h"
-#include "utility.h"
+#include "utility_functions.h"
 
 using std::vector;
 using std::string;
