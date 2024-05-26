@@ -16,9 +16,9 @@ namespace Utility
 
     struct Face
     {
-        std::vector<unsigned int> vertices;
-        std::vector<unsigned int> textureCoordinates;
-        unsigned int normal;
+        std::vector<unsigned int> vertexIndices;
+        std::vector<unsigned int> normalIndices;
+        std::vector<unsigned int> textureCoordinateIndices;
     };
 
     class Mesh {

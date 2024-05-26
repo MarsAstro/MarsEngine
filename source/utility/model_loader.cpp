@@ -54,17 +54,17 @@ Utility::Mesh Utility::ModelLoader::LoadMesh(const char *path)
     for (const Face& face : faces)
     {
         unsigned int baseIndex = vertices.size();
-        glm::vec3 normal = vertexNormals[face.normal - 1];
 
-        for (int i = 0; i < face.vertices.size(); ++i)
+        for (int i = 0; i < face.vertexIndices.size(); ++i)
         {
-            unsigned int vertexPosIndex = face.vertices[i];
-            unsigned int texCoordIndex = face.textureCoordinates[i];
+            unsigned int vertexPosIndex = face.vertexIndices[i];
+            unsigned int vertexNormIndex = face.normalIndices[i];
+            unsigned int texCoordIndex = face.textureCoordinateIndices[i];
 
-            vertices.push_back({ vertexPositions[vertexPosIndex - 1], normal, textureCoordinates[texCoordIndex - 1]});
+            vertices.push_back({ vertexPositions[vertexPosIndex - 1], vertexNormals[vertexNormIndex - 1], textureCoordinates[texCoordIndex - 1]});
         }
 
-        for (int i = 1; i < face.vertices.size() - 1; ++i)
+        for (int i = 1; i < face.vertexIndices.size() - 1; ++i)
         {
             indices.push_back(baseIndex);
             indices.push_back(baseIndex + i);
@@ -107,7 +107,6 @@ Utility::Face Utility::ModelLoader::ReadFaceFromLine(std::stringstream &lineStre
 {
     Face newFace;
     std::string lineWord;
-    newFace.normal = 0;
 
     while (!lineStream.eof())
     {
@@ -122,9 +121,9 @@ Utility::Face Utility::ModelLoader::ReadFaceFromLine(std::stringstream &lineStre
                 values[i] = std::stoi(lineWord);
         }
 
-        newFace.vertices.push_back(values[0]);
-        newFace.textureCoordinates.push_back(values[1]);
-        newFace.normal = values[2];
+        newFace.vertexIndices.push_back(values[0]);
+        newFace.textureCoordinateIndices.push_back(values[1]);
+        newFace.normalIndices.push_back(values[2]);
     }
 
     return newFace;
