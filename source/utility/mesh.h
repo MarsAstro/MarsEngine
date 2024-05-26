@@ -10,7 +10,15 @@ namespace Utility
     struct Vertex
     {
         glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec2 textureCoordinates;
+    };
 
+    struct Face
+    {
+        std::vector<unsigned int> vertices;
+        std::vector<unsigned int> textureCoordinates;
+        unsigned int normal;
     };
 
     class Mesh {
