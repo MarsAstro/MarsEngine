@@ -106,23 +106,23 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ShaderManager &shaderManager)
 void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
 {
     ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
-        "shaders/general/default.vert",
+        "shaders/general/default_old.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
         { Shading::Matrices, Shading::PointLights });
     ShaderProgram* windowShader         = shaderManager.CreateShaderProgram(
-        "shaders/general/default.vert",
+        "shaders/general/default_old.vert",
         "shaders/general/transparent_texture.frag",
         { Shading::Matrices });
     ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default.vert",
+        "shaders/general/default_old.vert",
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
     ShaderProgram* reflectionShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default.vert",
+        "shaders/general/default_old.vert",
         "shaders/general/skybox_reflection.frag",
         { Shading::Matrices });
     ShaderProgram* refractionShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default.vert",
+        "shaders/general/default_old.vert",
         "shaders/general/skybox_refraction.frag",
         { Shading::Matrices });
     ShaderProgram* skyboxShader         = shaderManager.CreateShaderProgram(
@@ -393,11 +393,11 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
         "shaders/general/basic_temp.frag",
         { Shading::Matrices, Shading::PointLights });
     ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default.vert",
+        "shaders/general/default_old.vert",
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
 
-    Utility::Mesh cube = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/cube.obj");
+    Utility::Mesh cube = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/colored_cube.obj");
     Utility::Mesh sphere = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/sphere.obj");
     Utility::Mesh cylinder = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/cylinder.obj");
 
@@ -436,7 +436,7 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
          */
         objectShader->Use();
         objectShader->SetMat4("model", model);
-        cylinder.Draw(objectShader);
+        cube.Draw(objectShader);
 
         model = translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0, 0.0f));
         objectShader->SetMat4("model", model);
@@ -444,7 +444,7 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
 
         model = translate(glm::mat4(1.0f), glm::vec3(-4.0f, 0.0, 0.0f));
         objectShader->SetMat4("model", model);
-        cube.Draw(objectShader);
+        cylinder.Draw(objectShader);
 
         /*
          * Draw lightcubes
