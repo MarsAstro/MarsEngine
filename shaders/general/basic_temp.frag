@@ -55,8 +55,8 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 viewDirection)
 {
     vec3 ambientMat = vec3(1.0);
     vec3 diffuseMat = vec3(0.5);
-    vec3 specularMat = vec3(1.0);
-    float shininess = 64.0;
+    vec3 specularMat = vec3(0.5);
+    float shininess = 250.0;
 
     if (MaterialIndex >= 0)
     {
