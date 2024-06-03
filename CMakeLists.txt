@@ -33,10 +33,15 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/classes/shader_manager.h
         source/classes/light_manager.cpp
         source/classes/light_manager.h
-        source/utility/model_loader.cpp
-        source/utility/model_loader.h
-        source/utility/mesh.cpp
-        source/utility/mesh.h)
+        source/assets/model_loader.cpp
+        source/assets/model_loader.h
+        source/rendering/mesh.cpp
+        source/rendering/mesh.h
+        source/assets/import_functions.cpp
+        source/assets/import_functions.h
+        source/rendering/rendering_functions.cpp
+        source/rendering/rendering_functions.h
+)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 

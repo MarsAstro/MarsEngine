@@ -8,12 +8,13 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "stb_image.h"
+#include "assets/import_functions.h"
+#include "rendering/rendering_functions.h"
 #include "utility/utility_functions.h"
 #include "classes/camera.h"
 #include "classes/model.h"
 #include "classes/shader_manager.h"
-#include "utility/mesh.h"
-#include "utility/model_loader.h"
+#include "assets/model_loader.h"
 
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
@@ -153,14 +154,14 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
-    Utility::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
-    windowTexture = Utility::LoadTexture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
+    Rendering::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+    windowTexture = Assets::LoadTexture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
 
     unsigned int screenVAO, screenVBO, screenEBO, screenIndicesCount;
-    Utility::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
+    Rendering::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
 
     unsigned int skyboxVAO, skyboxTexture;
-    Utility::CreateSkyboxCube(skyboxVAO);
+    Rendering::CreateSkyboxCube(skyboxVAO);
 
     std::vector<std::string> skyboxFaces
     {
@@ -172,7 +173,7 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
         "assets/textures/yokohama/back.jpg"
     };
     stbi_set_flip_vertically_on_load(false);
-    skyboxTexture = Utility::LoadCubemap(skyboxFaces, GL_RGB, GL_RGB);
+    skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_RGB, GL_RGB);
     stbi_set_flip_vertically_on_load(true);
 
     std::vector<glm::vec3> windowObjects;
@@ -397,9 +398,9 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
 
-    Utility::Mesh cube = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/colored_cube.obj");
-    Utility::Mesh sphere = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/sphere.obj");
-    Utility::Mesh cylinder = Utility::ModelLoader::LoadMesh("assets/models/basic_shapes/cylinder.obj");
+    Rendering::Mesh cube = Assets::ModelLoader::LoadMesh("assets/models/textured_cube/textured_cube.obj");
+    Rendering::Mesh sphere = Assets::ModelLoader::LoadMesh("assets/models/basic_shapes/sphere.obj");
+    Rendering::Mesh cylinder = Assets::ModelLoader::LoadMesh("assets/models/basic_shapes/cylinder.obj");
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),

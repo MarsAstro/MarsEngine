@@ -19,8 +19,8 @@ void Model::Draw(Shading::ShaderProgram* shader)
 
     shader->SetMat4("model", model);
 
-    for (unsigned int i = 0; i < mMeshes.size(); i++)
-        mMeshes[i].Draw(shader);
+    for (const auto & mMeshe : mMeshes)
+        mMeshe.Draw(shader);
 }
 
 void Model::LoadModel(std::string path)

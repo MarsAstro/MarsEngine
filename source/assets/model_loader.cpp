@@ -6,7 +6,9 @@
 #include <string>
 #include <utility>
 
-Utility::Mesh Utility::ModelLoader::LoadMesh(const char *path)
+#include "import_functions.h"
+
+Rendering::Mesh Assets::ModelLoader::LoadMesh(const char *path)
 {
     std::ifstream object;
     object.exceptions(std::ifstream::badbit);
@@ -20,11 +22,11 @@ Utility::Mesh Utility::ModelLoader::LoadMesh(const char *path)
         std::cout << "ERROR::ASSET::OBJ_FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
 
-    std::vector<Material> materials;
+    std::vector<Rendering::Material> materials;
     std::vector<glm::vec3> vertexPositions;
     std::vector<glm::vec3> vertexNormals;
     std::vector<glm::vec2> textureCoordinates;
-    std::vector<Face> faces;
+    std::vector<Rendering::Face> faces;
     std::string currentLine;
     std::string currentMaterialName;
 
@@ -52,10 +54,10 @@ Utility::Mesh Utility::ModelLoader::LoadMesh(const char *path)
             faces.push_back(ReadFaceFromLine(lineStream, currentMaterialName));
     }
 
-    std::vector<Vertex> vertices;
+    std::vector<Rendering::Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    for (const Face& face : faces)
+    for (const Rendering::Face& face : faces)
     {
         unsigned int baseIndex = vertices.size();
 
@@ -84,7 +86,7 @@ Utility::Mesh Utility::ModelLoader::LoadMesh(const char *path)
     return { vertices, indices, materials };
 }
 
-std::vector<Utility::Material> Utility::ModelLoader::ReadMaterialFile(std::stringstream &objLineStream,
+std::vector<Rendering::Material> Assets::ModelLoader::ReadMaterialFile(std::stringstream &objLineStream,
                                                                       const char *objPath)
 {
     std::string fileName;
@@ -108,7 +110,7 @@ std::vector<Utility::Material> Utility::ModelLoader::ReadMaterialFile(std::strin
 
     std::string currentLine;
     int currentMaterial = -1;
-    std::vector<Material> materials;
+    std::vector<Rendering::Material> materials;
 
     while (material.is_open() && !material.eof())
     {
@@ -129,21 +131,43 @@ std::vector<Utility::Material> Utility::ModelLoader::ReadMaterialFile(std::strin
         else if (lineWord == "Ns")
             materials[currentMaterial].shininess = ReadFloatFromLine(lineStream);
         else if (lineWord == "Ka")
-            materials[currentMaterial].ambient = ReadVec3FromLine(lineStream);
+            materials[currentMaterial].ambientColor = ReadVec3FromLine(lineStream);
         else if (lineWord == "Kd")
-            materials[currentMaterial].diffuse = ReadVec3FromLine(lineStream);
+            materials[currentMaterial].diffuseColor = ReadVec3FromLine(lineStream);
         else if (lineWord == "Ks")
-            materials[currentMaterial].specular = ReadVec3FromLine(lineStream);
+            materials[currentMaterial].specularColor = ReadVec3FromLine(lineStream);
         else if (lineWord == "Ke")
-            materials[currentMaterial].emissive = ReadVec3FromLine(lineStream);
+            materials[currentMaterial].emissiveColor = ReadVec3FromLine(lineStream);
+        else if (lineWord == "map_Kd")
+        {
+            materials[currentMaterial].diffuseMap = ReadTextureFromLine(lineStream, objPath);
+            materials[currentMaterial].hasDiffuseMap = true;
+        }
+        else if (lineWord == "map_Ks")
+        {
+            materials[currentMaterial].specularMap = ReadTextureFromLine(lineStream, objPath);
+            materials[currentMaterial].hasSpecularMap = true;
+        }
     }
 
     return materials;
 }
 
-Utility::Face Utility::ModelLoader::ReadFaceFromLine(std::stringstream &lineStream, std::string materialName)
+unsigned int Assets::ModelLoader::ReadTextureFromLine(std::stringstream &mtlLineStream, const char *objPath)
 {
-    Face newFace;
+    std::string fileName;
+    std::string path = objPath;
+    path = path.substr(0, path.find_last_of('/') + 1);
+
+    mtlLineStream >> fileName;
+    path += fileName;
+
+    return LoadTexture(path);
+}
+
+Rendering::Face Assets::ModelLoader::ReadFaceFromLine(std::stringstream &lineStream, std::string materialName)
+{
+    Rendering::Face newFace;
     newFace.materialName = std::move(materialName);
     std::string lineWord;
 
@@ -168,7 +192,7 @@ Utility::Face Utility::ModelLoader::ReadFaceFromLine(std::stringstream &lineStre
     return newFace;
 }
 
-float Utility::ModelLoader::ReadFloatFromLine(std::stringstream &lineStream)
+float Assets::ModelLoader::ReadFloatFromLine(std::stringstream &lineStream)
 {
     std::string lineWord;
     lineStream >> lineWord;
@@ -176,7 +200,7 @@ float Utility::ModelLoader::ReadFloatFromLine(std::stringstream &lineStream)
     return std::stof(lineWord);
 }
 
-glm::vec2 Utility::ModelLoader::ReadVec2FromLine(std::stringstream &lineStream)
+glm::vec2 Assets::ModelLoader::ReadVec2FromLine(std::stringstream &lineStream)
 {
     glm::vec2 newVector;
     std::string lineWord;
@@ -189,7 +213,7 @@ glm::vec2 Utility::ModelLoader::ReadVec2FromLine(std::stringstream &lineStream)
     return newVector;
 }
 
-glm::vec3 Utility::ModelLoader::ReadVec3FromLine(std::stringstream& lineStream)
+glm::vec3 Assets::ModelLoader::ReadVec3FromLine(std::stringstream& lineStream)
 {
     glm::vec3 newVector;
     std::string lineWord;
@@ -204,7 +228,7 @@ glm::vec3 Utility::ModelLoader::ReadVec3FromLine(std::stringstream& lineStream)
     return newVector;
 }
 
-int Utility::ModelLoader::GetMaterialIndex(const std::string& name, const std::vector<Material> &materials)
+int Assets::ModelLoader::GetMaterialIndex(const std::string& name, const std::vector<Rendering::Material> &materials)
 {
     int result = -1;
 

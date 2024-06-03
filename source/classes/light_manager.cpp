@@ -3,14 +3,14 @@
 #include <ext/matrix_transform.hpp>
 #include <glad/glad.h>
 
-#include "../utility/utility_functions.h"
+#include "../rendering/rendering_functions.h"
 
 using Shading::Lighting::LightManager;
 
 LightManager::LightManager(unsigned int maxPointLights)
 {
     pointLights.resize(maxPointLights);
-    Utility::CreateCube(0.025f, mVAO, mVBO);
+    Rendering::CreateCube(0.025f, mVAO, mVBO);
 }
 
 void LightManager::AddPointLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular,

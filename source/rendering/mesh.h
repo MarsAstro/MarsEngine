@@ -1,11 +1,11 @@
 #pragma once
 
-#include <glm.hpp>
+#include <../../libraries/glm/glm.hpp>
 #include <vector>
 
 #include "../classes/shader_program.h"
 
-namespace Utility
+namespace Rendering
 {
     struct Vertex
     {
@@ -26,11 +26,20 @@ namespace Utility
     struct Material
     {
         std::string name;
+
+        glm::vec3 ambientColor;
+
+        glm::vec3 diffuseColor;
+        int diffuseMap;
+        bool hasDiffuseMap;
+
+        glm::vec3 specularColor;
+        int specularMap;
+        bool hasSpecularMap;
+
+        glm::vec3 emissiveColor;
+
         float shininess;
-        glm::vec3 ambient;
-        glm::vec3 diffuse;
-        glm::vec3 specular;
-        glm::vec3 emissive;
     };
 
     class Mesh {
