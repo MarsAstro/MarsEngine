@@ -398,7 +398,7 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
 
-    Rendering::Mesh cube = Assets::ModelLoader::LoadMesh("assets/models/textured_cube/textured_cube.obj");
+    Rendering::Mesh cube = Assets::ModelLoader::LoadMesh("assets/models/container/container.obj");
     Rendering::Mesh sphere = Assets::ModelLoader::LoadMesh("assets/models/basic_shapes/sphere.obj");
     Rendering::Mesh cylinder = Assets::ModelLoader::LoadMesh("assets/models/basic_shapes/cylinder.obj");
 
