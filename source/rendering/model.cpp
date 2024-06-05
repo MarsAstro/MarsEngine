@@ -6,9 +6,11 @@
 #include <string>
 #include <utility>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "../assets/import_functions.h"
 
-Rendering::Model::Model(const char *path)
+Rendering::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
 {
     std::ifstream object;
     object.exceptions(std::ifstream::badbit);
@@ -101,6 +103,9 @@ Rendering::Model::Model(const char *path)
 
 void Rendering::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
 {
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
+    shaderProgram->SetMat4("model", model);
+
     for (const Mesh& mesh : mMeshes)
         mesh.Draw(shaderProgram);
 }

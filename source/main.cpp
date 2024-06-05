@@ -405,7 +405,6 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
                                          glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
                                          1.0f, 0.045f, 0.0075f);
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
@@ -419,7 +418,6 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
 
         ProcessInput(window);
 
-        model = glm::mat4(1.0f);
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
         shaderManager.SetViewAndProjectionMatrices(view, projection);
@@ -432,7 +430,6 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
          * Draw shapes
          */
         objectShader->Use();
-        objectShader->SetMat4("model", model);
         loadedModel.Draw(objectShader);
 
         /*

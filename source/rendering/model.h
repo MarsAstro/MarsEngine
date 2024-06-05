@@ -9,6 +9,8 @@ namespace Rendering
         explicit Model(const char* path);
         void Draw(const Shading::ShaderProgram* shaderProgram) const;
 
+        glm::vec3 position;
+
     private:
         static std::vector<Material> ReadMaterialFile(std::stringstream &objLineStream, const char *objPath);
         static unsigned int ReadTextureFromLine(std::stringstream& mtlLineStream, const char* objPath);
