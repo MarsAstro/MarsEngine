@@ -131,11 +131,6 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
     ShaderProgram* screenSpaceShader    = shaderManager.CreateShaderProgram(
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
-    ShaderProgram* explosionShader      = shaderManager.CreateShaderProgram(
-        "shaders/general/basic_geometry_model.vert",
-        "shaders/general/explode_object.geom",
-        "shaders/general/basic_geometry_unlit_diffuse.frag",
-        { Shading::Matrices });
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
@@ -243,16 +238,6 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
         backpack.position = glm::vec3(-8.0f, 1.0f, -12.0f);
         backpack.Draw(refractionShader);
-        backpack.position = glm::vec3(0.0f);
-
-        /*
-         * Draw exploding objects
-         */
-        explosionShader->Use();
-        explosionShader->SetFloat("time", currentTime);
-
-        backpack.position = glm::vec3(-2.0f, 1.0f, -12.0f);
-        backpack.Draw(explosionShader);
         backpack.position = glm::vec3(0.0f);
 
         /*
