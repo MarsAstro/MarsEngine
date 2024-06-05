@@ -71,8 +71,6 @@ int main()
     glfwSetCursorPosCallback(window, MainFunctions::MouseCallback);
     glfwSetScrollCallback(window, MainFunctions::ScrollCallback);
 
-    stbi_set_flip_vertically_on_load(true);
-
     ShaderManager shaderManager = ShaderManager();
 
     MainFunctions::ObjLoader(window, shaderManager);
@@ -398,9 +396,7 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
 
-    Rendering::Model cube = Rendering::Model("assets/models/basic_shapes/colored_cube.obj");
-    Rendering::Model sphere = Rendering::Model("assets/models/basic_shapes/sphere.obj");
-    Rendering::Model cylinder = Rendering::Model("assets/models/basic_shapes/cylinder.obj");
+    Rendering::Model loadedModel = Rendering::Model("assets/models/backpack/backpack.obj");
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
@@ -437,15 +433,7 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
          */
         objectShader->Use();
         objectShader->SetMat4("model", model);
-        cube.Draw(objectShader);
-
-        model = translate(glm::mat4(1.0f), glm::vec3(4.0f, 0.0, 0.0f));
-        objectShader->SetMat4("model", model);
-        sphere.Draw(objectShader);
-
-        model = translate(glm::mat4(1.0f), glm::vec3(-4.0f, 0.0, 0.0f));
-        objectShader->SetMat4("model", model);
-        cylinder.Draw(objectShader);
+        loadedModel.Draw(objectShader);
 
         /*
          * Draw lightcubes
