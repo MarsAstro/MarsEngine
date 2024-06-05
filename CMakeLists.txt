@@ -24,8 +24,8 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         libraries/stb_image.cpp
         source/shading/shader_manager.cpp
         source/shading/shader_manager.h
-        source/shading/light_manager.cpp
-        source/shading/light_manager.h
+        source/shading/lighting/light_manager.cpp
+        source/shading/lighting/light_manager.h
         source/geometry/model.cpp
         source/geometry/model.h
         source/geometry/mesh.cpp

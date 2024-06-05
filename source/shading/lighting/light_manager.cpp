@@ -3,7 +3,7 @@
 #include <ext/matrix_transform.hpp>
 #include <glad/glad.h>
 
-#include "../geometry/geometry_functions.h"
+#include "../../geometry/geometry_functions.h"
 
 using Shading::Lighting::LightManager;
 

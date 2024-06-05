@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include "shader_program.h"
-#include "light_manager.h"
+#include "lighting/light_manager.h"
 
 namespace Shading
 {

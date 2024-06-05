@@ -3,7 +3,7 @@
 #include <vector>
 #include <glm.hpp>
 
-#include "shader_program.h"
+#include "../shader_program.h"
 
 namespace Shading::Lighting
 {
