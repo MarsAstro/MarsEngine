@@ -15,25 +15,25 @@ include_directories(libraries/glad/include)
 include_directories(libraries/glm)
 
 set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
-        source/classes/shader_program.cpp
-        source/classes/shader_program.h
+        source/shading/shader_program.cpp
+        source/shading/shader_program.h
         source/utility/utility_functions.cpp
         source/utility/utility_functions.h
-        source/classes/camera.cpp
-        source/classes/camera.h
+        source/camera.cpp
+        source/camera.h
         libraries/stb_image.cpp
-        source/classes/shader_manager.cpp
-        source/classes/shader_manager.h
-        source/classes/light_manager.cpp
-        source/classes/light_manager.h
-        source/rendering/model.cpp
-        source/rendering/model.h
-        source/rendering/mesh.cpp
-        source/rendering/mesh.h
+        source/shading/shader_manager.cpp
+        source/shading/shader_manager.h
+        source/shading/light_manager.cpp
+        source/shading/light_manager.h
+        source/geometry/model.cpp
+        source/geometry/model.h
+        source/geometry/mesh.cpp
+        source/geometry/mesh.h
         source/assets/import_functions.cpp
         source/assets/import_functions.h
-        source/rendering/rendering_functions.cpp
-        source/rendering/rendering_functions.h
+        source/geometry/geometry_functions.cpp
+        source/geometry/geometry_functions.h
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})

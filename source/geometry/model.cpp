@@ -10,7 +10,7 @@
 
 #include "../assets/import_functions.h"
 
-Rendering::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
+Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
 {
     std::ifstream object;
     object.exceptions(std::ifstream::badbit);
@@ -101,7 +101,7 @@ Rendering::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
     }
 }
 
-void Rendering::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
+void Geometry::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
 {
     glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
     shaderProgram->SetMat4("model", model);
@@ -110,7 +110,7 @@ void Rendering::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
         mesh.Draw(shaderProgram);
 }
 
-std::vector<Rendering::Material> Rendering::Model::ReadMaterialFile(std::stringstream &objLineStream,
+std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstream &objLineStream,
                                                                       const char *objPath)
 {
     std::string fileName;
@@ -177,7 +177,7 @@ std::vector<Rendering::Material> Rendering::Model::ReadMaterialFile(std::strings
     return materials;
 }
 
-unsigned int Rendering::Model::ReadTextureFromLine(std::stringstream &mtlLineStream, const char *objPath)
+unsigned int Geometry::Model::ReadTextureFromLine(std::stringstream &mtlLineStream, const char *objPath)
 {
     std::string fileName;
     std::string path = objPath;
@@ -189,7 +189,7 @@ unsigned int Rendering::Model::ReadTextureFromLine(std::stringstream &mtlLineStr
     return Assets::LoadTexture(path);
 }
 
-Rendering::Face Rendering::Model::ReadFaceFromLine(std::stringstream &lineStream, std::string materialName)
+Geometry::Face Geometry::Model::ReadFaceFromLine(std::stringstream &lineStream, std::string materialName)
 {
     Face newFace;
     newFace.materialName = std::move(materialName);
@@ -216,7 +216,7 @@ Rendering::Face Rendering::Model::ReadFaceFromLine(std::stringstream &lineStream
     return newFace;
 }
 
-float Rendering::Model::ReadFloatFromLine(std::stringstream &lineStream)
+float Geometry::Model::ReadFloatFromLine(std::stringstream &lineStream)
 {
     std::string lineWord;
     lineStream >> lineWord;
@@ -224,7 +224,7 @@ float Rendering::Model::ReadFloatFromLine(std::stringstream &lineStream)
     return std::stof(lineWord);
 }
 
-glm::vec2 Rendering::Model::ReadVec2FromLine(std::stringstream &lineStream)
+glm::vec2 Geometry::Model::ReadVec2FromLine(std::stringstream &lineStream)
 {
     glm::vec2 newVector;
     std::string lineWord;
@@ -237,7 +237,7 @@ glm::vec2 Rendering::Model::ReadVec2FromLine(std::stringstream &lineStream)
     return newVector;
 }
 
-glm::vec3 Rendering::Model::ReadVec3FromLine(std::stringstream& lineStream)
+glm::vec3 Geometry::Model::ReadVec3FromLine(std::stringstream& lineStream)
 {
     glm::vec3 newVector;
     std::string lineWord;
@@ -252,7 +252,7 @@ glm::vec3 Rendering::Model::ReadVec3FromLine(std::stringstream& lineStream)
     return newVector;
 }
 
-int Rendering::Model::GetMaterialIndex(const std::string& name, const std::vector<Material> &materials)
+int Geometry::Model::GetMaterialIndex(const std::string& name, const std::vector<Material> &materials)
 {
     int result = -1;
 

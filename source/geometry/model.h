@@ -2,7 +2,7 @@
 
 #include "mesh.h"
 
-namespace Rendering
+namespace Geometry
 {
     class Model {
     public:

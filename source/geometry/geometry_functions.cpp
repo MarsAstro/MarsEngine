@@ -1,9 +1,9 @@
-#include "rendering_functions.h"
+#include "geometry_functions.h"
 
 #include <glad/glad.h>
 #include "../utility/utility_functions.h"
 
-void Rendering::CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
+void Geometry::CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
 {
     fillLevel = Utility::Clamp(fillLevel, 0.0f, 1.0f);
 
@@ -46,7 +46,7 @@ void Rendering::CreateSquare(float fillLevel, unsigned int& VAO, unsigned int& V
     glEnableVertexAttribArray(2);
 }
 
-void Rendering::CreateCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
+void Geometry::CreateCube(float sideLength, unsigned int& VAO, unsigned int& VBO)
 {
     float vertices[] = {
             -sideLength, -sideLength, -sideLength, 0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
@@ -110,7 +110,7 @@ void Rendering::CreateCube(float sideLength, unsigned int& VAO, unsigned int& VB
     glEnableVertexAttribArray(2);
 }
 
-void Rendering::CreateSkyboxCube(unsigned int& VAO)
+void Geometry::CreateSkyboxCube(unsigned int& VAO)
 {
     float skyboxVertices[] = {
             -1.0f,  1.0f, -1.0f,
@@ -169,7 +169,7 @@ void Rendering::CreateSkyboxCube(unsigned int& VAO)
     glEnableVertexAttribArray(0);
 }
 
-void Rendering::CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
+void Geometry::CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& VBO, unsigned int& EBO, unsigned int& indicesCount)
 {
     fillLevel = Utility::Clamp(fillLevel, 0.0f, 1.0f);
 

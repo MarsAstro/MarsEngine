@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <../libraries/glad/include/glad/glad.h>
+#include <../libraries/glm/glm.hpp>
+#include <../libraries/glm/gtc/matrix_transform.hpp>
 
 enum Camera_Movement {
     FORWARD,

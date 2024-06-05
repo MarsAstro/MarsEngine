@@ -3,9 +3,9 @@
 #include <../../libraries/glm/glm.hpp>
 #include <vector>
 
-#include "../classes/shader_program.h"
+#include "../shading/shader_program.h"
 
-namespace Rendering
+namespace Geometry
 {
     struct Vertex
     {

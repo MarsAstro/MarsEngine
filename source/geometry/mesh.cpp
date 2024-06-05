@@ -2,7 +2,7 @@
 
 #include <../../libraries/glad/include/glad/glad.h>
 
-Rendering::Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Material>& materials)
+Geometry::Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Material>& materials)
 {
     this->vertices = vertices;
     this->indices = indices;
@@ -33,7 +33,7 @@ Rendering::Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<uns
     glVertexAttribIPointer(3, 1, GL_INT, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, materialIndex)));
 }
 
-void Rendering::Mesh::Draw(const Shading::ShaderProgram *shader) const
+void Geometry::Mesh::Draw(const Shading::ShaderProgram *shader) const
 {
     for (int i = 0; i < materials.size(); ++i)
     {

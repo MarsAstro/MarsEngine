@@ -9,15 +9,15 @@
 
 #include "stb_image.h"
 #include "assets/import_functions.h"
-#include "rendering/rendering_functions.h"
+#include "geometry/geometry_functions.h"
 #include "utility/utility_functions.h"
-#include "classes/camera.h"
-#include "classes/shader_manager.h"
-#include "rendering/model.h"
+#include "camera.h"
+#include "shading/shader_manager.h"
+#include "geometry/model.h"
 
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
-using Rendering::Model;
+using Geometry::Model;
 
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 900;
@@ -147,14 +147,14 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
-    Rendering::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+    Geometry::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
     windowTexture = Assets::LoadTexture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
 
     unsigned int screenVAO, screenVBO, screenEBO, screenIndicesCount;
-    Rendering::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
+    Geometry::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
 
     unsigned int skyboxVAO, skyboxTexture;
-    Rendering::CreateSkyboxCube(skyboxVAO);
+    Geometry::CreateSkyboxCube(skyboxVAO);
 
     std::vector<std::string> skyboxFaces
     {
