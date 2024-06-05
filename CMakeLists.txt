@@ -7,23 +7,16 @@ set(CMAKE_CXX_STANDARD 23)
 
 # Subdirectories
 add_subdirectory(libraries/glfw)
-add_subdirectory(libraries/assimp)
 
 # Include directories
 include_directories(libraries)
 include_directories(libraries/glfw/include)
-include_directories(libraries/assimp/include)
 include_directories(libraries/glad/include)
 include_directories(libraries/glm)
 
-set(ASSIMP_BUILD_STATIC_LIB ON)
 set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/classes/shader_program.cpp
         source/classes/shader_program.h
-        source/classes/mesh.cpp
-        source/classes/mesh.h
-        source/classes/model.cpp
-        source/classes/model.h
         source/utility/utility_functions.cpp
         source/utility/utility_functions.h
         source/classes/camera.cpp
@@ -64,5 +57,5 @@ add_custom_command(TARGET ${PROJECT_NAME}
 #file(COPY shaders DESTINATION .)
 
 # Library linking
-target_link_libraries(${CMAKE_PROJECT_NAME} glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
+target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES} ${OPENGL_LIBRARY})
 link_directories(libraries)

@@ -12,12 +12,12 @@
 #include "rendering/rendering_functions.h"
 #include "utility/utility_functions.h"
 #include "classes/camera.h"
-#include "classes/model.h"
 #include "classes/shader_manager.h"
 #include "rendering/model.h"
 
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
+using Rendering::Model;
 
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 900;
@@ -73,7 +73,7 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    MainFunctions::ObjLoader(window, shaderManager);
+    MainFunctions::MainScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -105,23 +105,23 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ShaderManager &shaderManager)
 void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
 {
     ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
-        "shaders/general/default_old.vert",
+        "shaders/general/default.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
         { Shading::Matrices, Shading::PointLights });
     ShaderProgram* windowShader         = shaderManager.CreateShaderProgram(
-        "shaders/general/default_old.vert",
+        "shaders/general/default.vert",
         "shaders/general/transparent_texture.frag",
         { Shading::Matrices });
     ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default_old.vert",
+        "shaders/general/default.vert",
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
     ShaderProgram* reflectionShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default_old.vert",
+        "shaders/general/default.vert",
         "shaders/general/skybox_reflection.frag",
         { Shading::Matrices });
     ShaderProgram* refractionShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default_old.vert",
+        "shaders/general/default.vert",
         "shaders/general/skybox_refraction.frag",
         { Shading::Matrices });
     ShaderProgram* skyboxShader         = shaderManager.CreateShaderProgram(
@@ -389,14 +389,14 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
 {
     ShaderProgram* objectShader = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
-        "shaders/general/basic_temp.frag",
+        "shaders/lighting/blinn-phong/point_lights.frag",
         { Shading::Matrices, Shading::PointLights });
     ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
         "shaders/general/default_old.vert",
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
 
-    Rendering::Model loadedModel = Rendering::Model("assets/models/backpack/backpack.obj");
+    Model loadedModel = Model("assets/models/backpack/backpack.obj");
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
