@@ -14,7 +14,7 @@
 #include "classes/camera.h"
 #include "classes/model.h"
 #include "classes/shader_manager.h"
-#include "assets/model_loader.h"
+#include "rendering/model.h"
 
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
@@ -398,9 +398,9 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
         "shaders/general/solid_color.frag",
         { Shading::Matrices });
 
-    Rendering::Mesh cube = Assets::ModelLoader::LoadMesh("assets/models/container/container.obj");
-    Rendering::Mesh sphere = Assets::ModelLoader::LoadMesh("assets/models/basic_shapes/sphere.obj");
-    Rendering::Mesh cylinder = Assets::ModelLoader::LoadMesh("assets/models/basic_shapes/cylinder.obj");
+    Rendering::Model cube = Rendering::Model("assets/models/basic_shapes/colored_cube.obj");
+    Rendering::Model sphere = Rendering::Model("assets/models/basic_shapes/sphere.obj");
+    Rendering::Model cylinder = Rendering::Model("assets/models/basic_shapes/cylinder.obj");
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),

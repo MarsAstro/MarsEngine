@@ -1,4 +1,4 @@
-#include "model_loader.h"
+#include "model.h"
 
 #include <iostream>
 #include <fstream>
@@ -6,9 +6,9 @@
 #include <string>
 #include <utility>
 
-#include "import_functions.h"
+#include "../assets/import_functions.h"
 
-Rendering::Mesh Assets::ModelLoader::LoadMesh(const char *path)
+Rendering::Model::Model(const char *path)
 {
     std::ifstream object;
     object.exceptions(std::ifstream::badbit);
@@ -22,71 +22,90 @@ Rendering::Mesh Assets::ModelLoader::LoadMesh(const char *path)
         std::cout << "ERROR::ASSET::OBJ_FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
 
-    std::vector<Rendering::Material> materials;
-    std::vector<glm::vec3> vertexPositions;
-    std::vector<glm::vec3> vertexNormals;
-    std::vector<glm::vec2> textureCoordinates;
-    std::vector<Rendering::Face> faces;
-    std::string currentLine;
-    std::string currentMaterialName;
+    std::vector<Material> materials;
+    unsigned int vertexCount = 0;
+    unsigned int normalCount = 0;
+    unsigned int texCoordCount = 0;
 
     while (object.is_open() && !object.eof())
     {
-        std::getline(object, currentLine);
-        if (currentLine.empty() || currentLine[0] == '#')
-            continue;
+        std::vector<glm::vec3> vertexPositions;
+        std::vector<glm::vec3> vertexNormals;
+        std::vector<glm::vec2> textureCoordinates;
+        std::vector<Face> faces;
+        std::string currentLine;
+        std::string currentMaterialName;
 
-        std::stringstream lineStream (currentLine);
-        std::string lineWord;
-        lineStream >> lineWord;
-
-        if (lineWord == "mtllib")
-            materials = ReadMaterialFile(lineStream, path);
-        else if (lineWord == "v")
-            vertexPositions.push_back(ReadVec3FromLine(lineStream));
-        else if (lineWord == "vn")
-            vertexNormals.push_back(ReadVec3FromLine(lineStream));
-        else if (lineWord == "vt")
-            textureCoordinates.push_back(ReadVec2FromLine(lineStream));
-        else if (lineWord == "usemtl")
-            lineStream >> currentMaterialName;
-        else if (lineWord == "f")
-            faces.push_back(ReadFaceFromLine(lineStream, currentMaterialName));
-    }
-
-    std::vector<Rendering::Vertex> vertices;
-    std::vector<unsigned int> indices;
-
-    for (const Rendering::Face& face : faces)
-    {
-        unsigned int baseIndex = vertices.size();
-
-        for (int i = 0; i < face.vertexIndices.size(); ++i)
+        while (object.is_open() && !object.eof())
         {
-            unsigned int vertexPosIndex = face.vertexIndices[i];
-            unsigned int vertexNormIndex = face.normalIndices[i];
-            unsigned int texCoordIndex = face.textureCoordinateIndices[i];
+            std::getline(object, currentLine);
+            if (currentLine.empty() || currentLine[0] == '#')
+                continue;
 
-            vertices.push_back({
-                vertexPositions[vertexPosIndex - 1],
-                vertexNormals[vertexNormIndex - 1],
-                textureCoordinates[texCoordIndex - 1],
-                GetMaterialIndex(face.materialName, materials)
-            });
+            std::stringstream lineStream (currentLine);
+            std::string lineWord;
+            lineStream >> lineWord;
+
+            if (lineWord == "mtllib")
+                materials = ReadMaterialFile(lineStream, path);
+            else if (lineWord == "v")
+                vertexPositions.push_back(ReadVec3FromLine(lineStream));
+            else if (lineWord == "vn")
+                vertexNormals.push_back(ReadVec3FromLine(lineStream));
+            else if (lineWord == "vt")
+                textureCoordinates.push_back(ReadVec2FromLine(lineStream));
+            else if (lineWord == "usemtl")
+                lineStream >> currentMaterialName;
+            else if (lineWord == "f")
+                faces.push_back(ReadFaceFromLine(lineStream, currentMaterialName));
+            else if (lineWord == "o" && !vertexPositions.empty())
+                break;
         }
 
-        for (int i = 1; i < face.vertexIndices.size() - 1; ++i)
-        {
-            indices.push_back(baseIndex);
-            indices.push_back(baseIndex + i);
-            indices.push_back(baseIndex + i + 1);
-        }
-    }
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
 
-    return { vertices, indices, materials };
+        for (const Face& face : faces)
+        {
+            unsigned int baseIndex = vertices.size();
+
+            for (int i = 0; i < face.vertexIndices.size(); ++i)
+            {
+                unsigned int vertexPosIndex = face.vertexIndices[i] - vertexCount - 1;
+                unsigned int vertexNormIndex = face.normalIndices[i] - normalCount - 1;
+                unsigned int texCoordIndex = face.textureCoordinateIndices[i] - texCoordCount - 1;
+
+                vertices.push_back({
+                    vertexPositions[vertexPosIndex],
+                    vertexNormals[vertexNormIndex],
+                    textureCoordinates[texCoordIndex],
+                    GetMaterialIndex(face.materialName, materials)
+                });
+            }
+
+            for (int i = 1; i < face.vertexIndices.size() - 1; ++i)
+            {
+                indices.push_back(baseIndex);
+                indices.push_back(baseIndex + i);
+                indices.push_back(baseIndex + i + 1);
+            }
+        }
+
+        vertexCount += vertexPositions.size();
+        normalCount += vertexNormals.size();
+        texCoordCount += textureCoordinates.size();
+
+        mMeshes.emplace_back(vertices, indices, materials);
+    }
 }
 
-std::vector<Rendering::Material> Assets::ModelLoader::ReadMaterialFile(std::stringstream &objLineStream,
+void Rendering::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
+{
+    for (const Mesh& mesh : mMeshes)
+        mesh.Draw(shaderProgram);
+}
+
+std::vector<Rendering::Material> Rendering::Model::ReadMaterialFile(std::stringstream &objLineStream,
                                                                       const char *objPath)
 {
     std::string fileName;
@@ -110,7 +129,7 @@ std::vector<Rendering::Material> Assets::ModelLoader::ReadMaterialFile(std::stri
 
     std::string currentLine;
     int currentMaterial = -1;
-    std::vector<Rendering::Material> materials;
+    std::vector<Material> materials;
 
     while (material.is_open() && !material.eof())
     {
@@ -153,7 +172,7 @@ std::vector<Rendering::Material> Assets::ModelLoader::ReadMaterialFile(std::stri
     return materials;
 }
 
-unsigned int Assets::ModelLoader::ReadTextureFromLine(std::stringstream &mtlLineStream, const char *objPath)
+unsigned int Rendering::Model::ReadTextureFromLine(std::stringstream &mtlLineStream, const char *objPath)
 {
     std::string fileName;
     std::string path = objPath;
@@ -162,12 +181,12 @@ unsigned int Assets::ModelLoader::ReadTextureFromLine(std::stringstream &mtlLine
     mtlLineStream >> fileName;
     path += fileName;
 
-    return LoadTexture(path);
+    return Assets::LoadTexture(path);
 }
 
-Rendering::Face Assets::ModelLoader::ReadFaceFromLine(std::stringstream &lineStream, std::string materialName)
+Rendering::Face Rendering::Model::ReadFaceFromLine(std::stringstream &lineStream, std::string materialName)
 {
-    Rendering::Face newFace;
+    Face newFace;
     newFace.materialName = std::move(materialName);
     std::string lineWord;
 
@@ -192,7 +211,7 @@ Rendering::Face Assets::ModelLoader::ReadFaceFromLine(std::stringstream &lineStr
     return newFace;
 }
 
-float Assets::ModelLoader::ReadFloatFromLine(std::stringstream &lineStream)
+float Rendering::Model::ReadFloatFromLine(std::stringstream &lineStream)
 {
     std::string lineWord;
     lineStream >> lineWord;
@@ -200,7 +219,7 @@ float Assets::ModelLoader::ReadFloatFromLine(std::stringstream &lineStream)
     return std::stof(lineWord);
 }
 
-glm::vec2 Assets::ModelLoader::ReadVec2FromLine(std::stringstream &lineStream)
+glm::vec2 Rendering::Model::ReadVec2FromLine(std::stringstream &lineStream)
 {
     glm::vec2 newVector;
     std::string lineWord;
@@ -213,7 +232,7 @@ glm::vec2 Assets::ModelLoader::ReadVec2FromLine(std::stringstream &lineStream)
     return newVector;
 }
 
-glm::vec3 Assets::ModelLoader::ReadVec3FromLine(std::stringstream& lineStream)
+glm::vec3 Rendering::Model::ReadVec3FromLine(std::stringstream& lineStream)
 {
     glm::vec3 newVector;
     std::string lineWord;
@@ -228,7 +247,7 @@ glm::vec3 Assets::ModelLoader::ReadVec3FromLine(std::stringstream& lineStream)
     return newVector;
 }
 
-int Assets::ModelLoader::GetMaterialIndex(const std::string& name, const std::vector<Rendering::Material> &materials)
+int Rendering::Model::GetMaterialIndex(const std::string& name, const std::vector<Material> &materials)
 {
     int result = -1;
 

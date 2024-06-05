@@ -33,8 +33,8 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/classes/shader_manager.h
         source/classes/light_manager.cpp
         source/classes/light_manager.h
-        source/assets/model_loader.cpp
-        source/assets/model_loader.h
+        source/rendering/model.cpp
+        source/rendering/model.h
         source/rendering/mesh.cpp
         source/rendering/mesh.h
         source/assets/import_functions.cpp
