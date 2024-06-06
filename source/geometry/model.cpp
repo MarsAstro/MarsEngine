@@ -24,7 +24,6 @@ Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
         std::cout << "ERROR::ASSET::OBJ_FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
 
-    std::vector<Material> materials;
     unsigned int vertexCount = 0;
     unsigned int normalCount = 0;
     unsigned int texCoordCount = 0;
@@ -49,7 +48,7 @@ Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
             lineStream >> lineWord;
 
             if (lineWord == "mtllib")
-                materials = ReadMaterialFile(lineStream, path);
+                mMaterials = ReadMaterialFile(lineStream, path);
             else if (lineWord == "v")
                 vertexPositions.push_back(ReadVec3FromLine(lineStream));
             else if (lineWord == "vn")
@@ -81,7 +80,7 @@ Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
                     vertexPositions[vertexPosIndex],
                     vertexNormals[vertexNormIndex],
                     textureCoordinates[texCoordIndex],
-                    GetMaterialIndex(face.materialName, materials)
+                    GetMaterialIndex(face.materialName, mMaterials)
                 });
             }
 
@@ -97,7 +96,7 @@ Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
         normalCount += vertexNormals.size();
         texCoordCount += textureCoordinates.size();
 
-        mMeshes.emplace_back(vertices, indices, materials);
+        mMeshes.emplace_back(vertices, indices);
     }
 }
 
@@ -107,7 +106,7 @@ void Geometry::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
     shaderProgram->SetMat4("model", model);
 
     for (const Mesh& mesh : mMeshes)
-        mesh.Draw(shaderProgram);
+        mesh.Draw(shaderProgram, mMaterials);
 }
 
 std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstream &objLineStream,

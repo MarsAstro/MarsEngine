@@ -23,5 +23,6 @@ namespace Geometry
         static int GetMaterialIndex(const std::string& name, const std::vector<Material> &materials);
 
         std::vector<Mesh> mMeshes;
+        std::vector<Material> mMaterials;
     };
 }

@@ -44,12 +44,11 @@ namespace Geometry
 
     class Mesh {
     public:
-        std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
-        std::vector<Material> materials;
+        std::vector<Vertex> mVertices;
+        std::vector<unsigned int> mIndices;
 
-        Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Material>& materials);
-        void Draw(const Shading::ShaderProgram* shader) const;
+        Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+        void Draw(const Shading::ShaderProgram* shader, const std::vector<Material>& materials) const;
 
     private:
         unsigned int VAO, VBO, EBO;
