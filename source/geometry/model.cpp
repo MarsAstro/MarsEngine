@@ -10,7 +10,7 @@
 
 #include "../assets/import_functions.h"
 
-Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
+Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f)
 {
     std::ifstream object;
     object.exceptions(std::ifstream::badbit);
@@ -103,14 +103,21 @@ Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f)
 void Geometry::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
 {
     glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
+    model = glm::scale(model, scale);
     shaderProgram->SetMat4("model", model);
 
     for (const Mesh& mesh : mMeshes)
         mesh.Draw(shaderProgram, mMaterials);
 }
 
+void Geometry::Model::DrawInstanced(const Shading::ShaderProgram* shaderProgram, const int amount) const
+{
+    for (const Mesh& mesh : mMeshes)
+        mesh.DrawInstanced(shaderProgram, mMaterials, amount);
+}
+
 std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstream &objLineStream,
-                                                                      const char *objPath)
+                                                                  const char *objPath)
 {
     std::string fileName;
     std::string path = objPath;

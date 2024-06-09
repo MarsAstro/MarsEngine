@@ -29,7 +29,8 @@ namespace MainFunctions
 {
     // Scenes
     void EmptyScene(GLFWwindow *window, ShaderManager& shaderManager);
-    void MainScene(GLFWwindow *window, ShaderManager& shaderManager);
+    void SpaceScene(GLFWwindow *window, ShaderManager& shaderManager);
+    void Playground(GLFWwindow *window, ShaderManager& shaderManager);
     void GeometryHousesScene(GLFWwindow *window, ShaderManager& shaderManager);
     void ObjLoader(GLFWwindow *window, ShaderManager& shaderManager);
 
@@ -45,7 +46,7 @@ namespace MainFunctions
 }
 
 Camera camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
-glm::mat4 model;
+
 glm::mat4 view;
 glm::mat4 projection;
 
@@ -74,7 +75,7 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    MainFunctions::MainScene(window, shaderManager);
+    MainFunctions::SpaceScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -82,28 +83,128 @@ int main()
 
 void MainFunctions::EmptyScene(GLFWwindow *window, ShaderManager &shaderManager)
 {
-    model = glm::mat4(1.0f);
+    glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
         previousTime = currentTime;
 
+        ProcessInput(window);
+
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
-        ProcessInput(window);
+        shaderManager.SetViewAndProjectionMatrices(view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 }
 
-void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
+void MainFunctions::SpaceScene(GLFWwindow *window, ShaderManager &shaderManager)
+{
+    ShaderProgram* unlitShader = shaderManager.CreateShaderProgram(
+        "shaders/general/default.vert",
+        "shaders/lighting/simple_diffuse_unlit.frag",
+        { Shading::Matrices });
+    ShaderProgram* instancedUnlitShader = shaderManager.CreateShaderProgram(
+        "shaders/general/default_instanced.vert",
+        "shaders/lighting/simple_diffuse_unlit.frag",
+        { Shading::Matrices });
+
+    Model planet = Model("assets/models/planet/planet.obj");
+    Model asteroid = Model("assets/models/rock/rock.obj");
+
+    camera.Position = glm::vec3(0.0f, 0.0f, 40.0f);
+    planet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
+
+    unsigned int amount = 200000;
+    glm::mat4* modelMatrices = new glm::mat4[amount];
+    srand(glfwGetTime());
+    float radius = 120.0f;
+    float offset = 50.0f;
+
+    for (unsigned int i = 0; i < amount; ++i)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        float angle = static_cast<float>(i) / static_cast<float>(amount) * 360.0f;
+        float displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
+        float x = sin(angle) * radius + displacement;
+        displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
+        float y = displacement * 0.02f;
+        displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
+        float z = cos(angle) * radius + displacement;
+        model = translate(model, glm::vec3(x, y, z));
+
+        float scale = (rand() % 20) / 100.0f + 0.05f;
+        model = glm::scale(model, glm::vec3(scale));
+
+        float rotAngle = (rand() % 360);
+        model = glm::rotate(model, rotAngle, glm::vec3(0.4, 0.6f, 0.8f));
+
+        modelMatrices[i] = model;
+    }
+
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(asteroid.mMeshes[0].VAO);
+    std::size_t vec4Size = sizeof(glm::vec4);
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, nullptr);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(1 * vec4Size));
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(2 * vec4Size));
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(3 * vec4Size));
+
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+    glVertexAttribDivisor(7, 1);
+
+    glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 500.0f);
+
+        shaderManager.SetViewAndProjectionMatrices(view, projection);
+
+        unlitShader->Use();
+        planet.Draw(unlitShader);
+
+        instancedUnlitShader->Use();
+        asteroid.DrawInstanced(instancedUnlitShader, amount);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    delete[] modelMatrices;
+}
+
+void MainFunctions::Playground(GLFWwindow *window, ShaderManager& shaderManager)
 {
     ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
@@ -287,9 +388,9 @@ void MainFunctions::MainScene(GLFWwindow *window, ShaderManager& shaderManager)
 
         for (std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it)
         {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, it->second);
-            model = glm::scale(model, glm::vec3(3.0f));
+            glm::mat4 model = glm::mat4(1.0f);
+            model = translate(model, it->second);
+            model = scale(model, glm::vec3(3.0f));
 
             windowShader->SetMat4("model", model);
             glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
@@ -450,7 +551,7 @@ void MainFunctions::ProcessInput(GLFWwindow* window)
         camera.ProcessKeyboard(RIGHT, deltaTime, tripleSpeed);
 }
 
-void MainFunctions::MouseCallback(GLFWwindow* window, double xpos, double ypos)
+void MainFunctions::MouseCallback(GLFWwindow* window, const double xpos, const double ypos)
 {
     if (firstMouse)
     {
@@ -467,12 +568,12 @@ void MainFunctions::MouseCallback(GLFWwindow* window, double xpos, double ypos)
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-void MainFunctions::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void MainFunctions::ScrollCallback(GLFWwindow* window, double xoffset, const double yoffset)
 {
     camera.ProcesMouseScroll(yoffset);
 }
 
-void MainFunctions::FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+void MainFunctions::FramebufferSizeCallback(GLFWwindow* window, const int width, const int height)
 {
     glViewport(0, 0, width, height);
 

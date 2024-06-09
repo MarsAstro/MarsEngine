@@ -34,6 +34,24 @@ Geometry::Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsi
 
 void Geometry::Mesh::Draw(const Shading::ShaderProgram* shader, const std::vector<Material>& materials) const
 {
+    SetMaterials(shader, materials);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
+}
+
+void Geometry::Mesh::DrawInstanced(const Shading::ShaderProgram *shader, const std::vector<Material> &materials, const int amount) const
+{
+    SetMaterials(shader, materials);
+
+    glBindVertexArray(VAO);
+    glDrawElementsInstanced(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr, amount);
+    glBindVertexArray(0);
+}
+
+void Geometry::Mesh::SetMaterials(const Shading::ShaderProgram* shader, const std::vector<Material> &materials)
+{
     for (int i = 0; i < materials.size(); ++i)
     {
         std::string prefix = "materials[" + std::to_string(i) + "].";
@@ -56,8 +74,4 @@ void Geometry::Mesh::Draw(const Shading::ShaderProgram* shader, const std::vecto
         shader->SetInt(prefix + "specularMap", textureIndex);
         shader->SetBool(prefix + "hasSpecularMap", materials[i].hasSpecularMap);
     }
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
-    glBindVertexArray(0);
 }
