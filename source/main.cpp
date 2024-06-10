@@ -32,7 +32,7 @@ namespace MainFunctions
     void SpaceScene(GLFWwindow *window, ShaderManager& shaderManager);
     void Playground(GLFWwindow *window, ShaderManager& shaderManager);
     void GeometryHousesScene(GLFWwindow *window, ShaderManager& shaderManager);
-    void ObjLoader(GLFWwindow *window, ShaderManager& shaderManager);
+    void ModelViewer(GLFWwindow *window, ShaderManager& shaderManager);
 
     // Input stuff
     void ProcessInput(GLFWwindow* window);
@@ -472,25 +472,20 @@ void MainFunctions::GeometryHousesScene(GLFWwindow* window, ShaderManager& shade
     }
 }
 
-void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
+void MainFunctions::ModelViewer(GLFWwindow *window, ShaderManager &shaderManager)
 {
     ShaderProgram* objectShader = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
         { Shading::Matrices, Shading::PointLights });
-    ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
-        "shaders/general/default_old.vert",
-        "shaders/general/solid_color.frag",
-        { Shading::Matrices });
 
-    Model loadedModel = Model("assets/models/backpack/backpack.obj");
+    stbi_set_flip_vertically_on_load(true);
+    Model loadedModel = Model("assets/models/shanalotte/Shanalotte.obj");
+    loadedModel.scale = glm::vec3(0.2f);
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
-                                             1.0f, 0.045f, 0.0075f);
-    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
-                                         glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
-                                         1.0f, 0.045f, 0.0075f);
+                                             1.0f, 0.014f, 0.0007f);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -509,8 +504,7 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
         shaderManager.SetViewAndProjectionMatrices(view, projection);
 
-        shaderManager.lightManager.MovePointLight(0, glm::vec3(cos(currentTime / 1.33f) * 2.5f, 0, sin(currentTime / 1.33f) * 2.5f));
-        shaderManager.lightManager.MovePointLight(1, glm::vec3(cos(currentTime) * 2.5f, sin(currentTime) * 2.5f, 0));
+        shaderManager.lightManager.MovePointLight(0, camera.Position);
         shaderManager.UpdateLightsBuffer(view);
 
         /*
@@ -518,16 +512,6 @@ void MainFunctions::ObjLoader(GLFWwindow *window, ShaderManager &shaderManager)
          */
         objectShader->Use();
         loadedModel.Draw(objectShader);
-
-        /*
-         * Draw lightcubes
-         */
-        glDisable(GL_CULL_FACE);
-
-        solidColorShader->Use();
-        shaderManager.lightManager.DrawPointLightCubes(solidColorShader);
-
-        glEnable(GL_CULL_FACE);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
