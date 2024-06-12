@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <map>
 
 #include <glad/glad.h>
@@ -123,29 +124,35 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ShaderManager &shaderManager)
     camera.Position = glm::vec3(0.0f, 0.0f, 40.0f);
     planet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
 
+    std::random_device randomDevice;
+    std::mt19937 randomEngine(randomDevice());
+    std::uniform_int_distribution scaleDist(0, 19);
+    std::uniform_int_distribution rotationDist(0, 359);
+
     unsigned int amount = 200000;
     glm::mat4* modelMatrices = new glm::mat4[amount];
-    srand(glfwGetTime());
     float radius = 120.0f;
     float offset = 50.0f;
 
     for (unsigned int i = 0; i < amount; ++i)
     {
-        glm::mat4 model = glm::mat4(1.0f);
         float angle = static_cast<float>(i) / static_cast<float>(amount) * 360.0f;
-        float displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
+        glm::mat4 model = glm::mat4(1.0f);
+        std::uniform_int_distribution positionDist(0, static_cast<int>(2 * offset * 100));
+
+        float displacement = positionDist(randomEngine) / 100.0f - offset;
         float x = sin(angle) * radius + displacement;
-        displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
+        displacement = positionDist(randomEngine) / 100.0f - offset;
         float y = displacement * 0.02f;
-        displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
+        displacement = positionDist(randomEngine) / 100.0f - offset;
         float z = cos(angle) * radius + displacement;
         model = translate(model, glm::vec3(x, y, z));
 
-        float scale = (rand() % 20) / 100.0f + 0.05f;
+        float scale = scaleDist(randomEngine) / 100.0f + 0.05f;
         model = glm::scale(model, glm::vec3(scale));
 
-        float rotAngle = (rand() % 360);
-        model = glm::rotate(model, rotAngle, glm::vec3(0.4, 0.6f, 0.8f));
+        float rotAngle = rotationDist(randomEngine) % 360;
+        model = rotate(model, rotAngle, glm::vec3(0.4, 0.6f, 0.8f));
 
         modelMatrices[i] = model;
     }
