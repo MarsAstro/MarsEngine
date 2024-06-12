@@ -15,12 +15,17 @@ float Utility::Clamp(float d, float min, float max) {
     return t > max ? max : t;
 }
 
-GLFWwindow* Utility::SetupGLFWWindow(int windowWith, int windowHeight, const char* title)
+GLFWwindow* Utility::SetupGLFWWindow(int windowWith, int windowHeight, int msaa, const char* title)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    if (msaa > 0)
+    {
+        glfwWindowHint(GLFW_SAMPLES, msaa);
+    }
 
     GLFWwindow* window = glfwCreateWindow(windowWith, windowHeight, title, nullptr, nullptr);
     if (window == nullptr)

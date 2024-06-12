@@ -8,6 +8,6 @@ namespace Utility
 {
     float Clamp(float d, float min, float max);
 
-    GLFWwindow* SetupGLFWWindow(int windowWith, int windowHeight, const char* title);
+    GLFWwindow* SetupGLFWWindow(int windowWith, int windowHeight, int msaa, const char* title);
     int InitializeGLADLoader();
 }

@@ -62,13 +62,15 @@ float previousTime = 0;
 
 int main()
 {
-    GLFWwindow* window = Utility::SetupGLFWWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Mars Engine");
+    GLFWwindow* window = Utility::SetupGLFWWindow(SCREEN_WIDTH, SCREEN_HEIGHT, 8, "Mars Engine");
 
     if (window == nullptr || Utility::InitializeGLADLoader() < 0)
         return -1;
 
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glfwSwapInterval(0);
     glfwSetFramebufferSizeCallback(window, MainFunctions::FramebufferSizeCallback);
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glEnable(GL_MULTISAMPLE);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, MainFunctions::MouseCallback);
@@ -483,11 +485,11 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ShaderManager &shaderManager
 {
     ShaderProgram* objectShader = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
-        "shaders/lighting/blinn-phong/point_lights.frag",
+        "shaders/lighting/simple_diffuse_unlit.frag",
         { Shading::Matrices, Shading::PointLights });
 
     stbi_set_flip_vertically_on_load(true);
-    Model loadedModel = Model("assets/models/shanalotte/Shanalotte.obj");
+    Model loadedModel = Model("assets/models/rock/rock.obj");
     loadedModel.scale = glm::vec3(0.2f);
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
