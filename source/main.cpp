@@ -80,7 +80,7 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    MainFunctions::Playground(window, shaderManager);
+    MainFunctions::SpaceScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -499,7 +499,7 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ShaderManager &shaderManager
         { Shading::Matrices, Shading::PointLights });
 
     stbi_set_flip_vertically_on_load(true);
-    Model loadedModel = Model("assets/models/rock/rock.obj");
+    Model loadedModel = Model("assets/models/shanalotte/Shanalotte.obj");
     loadedModel.scale = glm::vec3(0.2f);
 
     shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
