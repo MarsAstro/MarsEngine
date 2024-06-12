@@ -16,6 +16,7 @@
 #include "geometry/geometry_functions.h"
 #include "shading/shader_manager.h"
 #include "geometry/model.h"
+#include "glfw/src/internal.h"
 
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
@@ -23,6 +24,7 @@ using Geometry::Model;
 
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 900;
+constexpr int MSAA = 16;
 int screenWidth = SCREEN_WIDTH;
 int screenHeight = SCREEN_HEIGHT;
 
@@ -55,14 +57,14 @@ float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
 
-unsigned int framebuffer, renderbuffer, textureColorbuffer;
+unsigned int framebuffer, msaaFramebuffer, renderbuffer, textureColorbuffer, msaaTextureColorbuffer;
 
 float deltaTime = 0;
 float previousTime = 0;
 
 int main()
 {
-    GLFWwindow* window = Utility::SetupGLFWWindow(SCREEN_WIDTH, SCREEN_HEIGHT, 8, "Mars Engine");
+    GLFWwindow* window = Utility::SetupGLFWWindow(SCREEN_WIDTH, SCREEN_HEIGHT, MSAA, "Mars Engine");
 
     if (window == nullptr || Utility::InitializeGLADLoader() < 0)
         return -1;
@@ -78,7 +80,7 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    MainFunctions::SpaceScene(window, shaderManager);
+    MainFunctions::Playground(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -285,6 +287,7 @@ void MainFunctions::Playground(GLFWwindow *window, ShaderManager& shaderManager)
     windowObjects.emplace_back(0.0f, -1.0f,  7.0f);
 
     SetupFramebuffer();
+    unsigned int drawBuffer = MSAA > 0 ? msaaFramebuffer : framebuffer;
 
     glEnable(GL_STENCIL_TEST);
     glEnable(GL_CULL_FACE);
@@ -300,7 +303,7 @@ void MainFunctions::Playground(GLFWwindow *window, ShaderManager& shaderManager)
         * MAIN DRAW PASS
         *
         */
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, drawBuffer);
         glEnable(GL_DEPTH_TEST);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
@@ -414,6 +417,13 @@ void MainFunctions::Playground(GLFWwindow *window, ShaderManager& shaderManager)
         * SCREEN SPACE DRAW PASS
         *
         */
+        if (MSAA > 0)
+        {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFramebuffer);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+            glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        }
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -590,9 +600,37 @@ void MainFunctions::SetupFramebuffer()
     glBindTexture(GL_TEXTURE_2D, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
 
+    if (MSAA <= 0)
+    {
+        glGenRenderbuffers(1, &renderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        return;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glGenFramebuffers(1, &msaaFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, msaaFramebuffer);
+
+    glGenTextures(1, &msaaTextureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaTextureColorbuffer);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA, GL_RGB, screenWidth, screenHeight, GL_TRUE);
+    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, msaaTextureColorbuffer, 0);
+
     glGenRenderbuffers(1, &renderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
 
@@ -607,4 +645,10 @@ void MainFunctions::CleanupFramebuffer()
     glDeleteFramebuffers(1, &framebuffer);
     glDeleteTextures(1, &textureColorbuffer);
     glDeleteRenderbuffers(1, &renderbuffer);
+
+    if (MSAA <= 0)
+        return;
+
+    glDeleteFramebuffers(1, &msaaFramebuffer);
+    glDeleteTextures(1, &msaaTextureColorbuffer);
 }
