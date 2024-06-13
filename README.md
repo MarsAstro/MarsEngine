@@ -21,7 +21,7 @@ To run the engine, you simply need to clone the repository and build the project
   git clone --recursive-submodules -j8 https://github.com/MarsAstro/MarsEngine.git
 ```
 
-The engine relies on symbolic links to ensure files in the assets and shaders folders follow along with the build so that they are available to load via relative paths. Symbolic links are deactivated by default on Windows, to activate them [follow this guide](https://portal.perforce.com/s/article/3472).
+The engine relies on symbolic links to ensure files in the assets and shaders folders follow along with the build so that they are available to load via relative paths. Symbolic links are deactivated by default on Windows, to activate them [follow this guide](https://neacsu.net/posts/win_symlinks/).
 
 If you can't or won't activate symbolic links, edit the CMakeLists.txt file to directly copy the files instead:
 
