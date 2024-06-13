@@ -103,14 +103,14 @@ Surface CalculateSurface()
         surface.ambient = materials[MaterialIndex].ambientColor;
 
         if (materials[MaterialIndex].hasDiffuseMap)
-        surface.diffuse = vec3(texture(materials[MaterialIndex].diffuseMap, TextureCoordinates));
+            surface.diffuse = vec3(texture(materials[MaterialIndex].diffuseMap, TextureCoordinates));
         else
-        surface.diffuse = materials[MaterialIndex].diffuseColor;
+            surface.diffuse = materials[MaterialIndex].diffuseColor;
 
         if (materials[MaterialIndex].hasSpecularMap)
-        surface.specular = vec3(texture(materials[MaterialIndex].specularMap, TextureCoordinates));
+            surface.specular = vec3(texture(materials[MaterialIndex].specularMap, TextureCoordinates));
         else
-        surface.specular = materials[MaterialIndex].specularColor;
+            surface.specular = materials[MaterialIndex].specularColor;
 
         surface.shininess = materials[MaterialIndex].shininess;
     }

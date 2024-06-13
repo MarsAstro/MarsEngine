@@ -3,7 +3,6 @@
 #include <map>
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,7 +15,6 @@
 #include "geometry/geometry_functions.h"
 #include "shading/shader_manager.h"
 #include "geometry/model.h"
-#include "glfw/src/internal.h"
 
 using Shading::ShaderManager;
 using Shading::ShaderProgram;
@@ -80,7 +78,7 @@ int main()
 
     ShaderManager shaderManager = ShaderManager();
 
-    MainFunctions::SpaceScene(window, shaderManager);
+    MainFunctions::Playground(window, shaderManager);
 
     glfwTerminate();
     return 0;
