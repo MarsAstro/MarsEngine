@@ -644,7 +644,7 @@ void MainFunctions::CleanupFramebuffer()
     glDeleteTextures(1, &textureColorbuffer);
     glDeleteRenderbuffers(1, &renderbuffer);
 
-    if (MSAA <= 0)
+    if constexpr (MSAA <= 0)
         return;
 
     glDeleteFramebuffers(1, &msaaFramebuffer);
