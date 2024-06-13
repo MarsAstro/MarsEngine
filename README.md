@@ -32,7 +32,7 @@ If you can't or won't activate symbolic links, edit the CMakeLists.txt file to d
 #Replace symlink custom commands with this line if symbolic links don't work on your machine
 [...] UNCOMMENT CODE FOLLOWING THIS COMMENT
 ```
-Note that this means you need to delete build directory and reload the CMake project, or manually replace the files, whenever you want to update the content of the assets and shaders folders. Symbolic links are strongly recommended for this reason.
+Note that this means you need to do a clean rebuild, or manually replace the files, whenever you want to update the content of the assets and shaders folders. Symbolic links are strongly recommended for this reason.
 ## FAQ
 #### When will this game engine replace all other game engines?
 
