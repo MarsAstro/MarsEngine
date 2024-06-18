@@ -10,15 +10,14 @@ namespace Shading
     enum ShaderUniformBlock
     {
         Matrices = 0,
-        PointLights = 1
+        PointLights = 1,
+        Materials = 2
     };
 
     class ShaderManager
     {
     public:
         ShaderManager();
-
-        static const char* GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock);
 
         ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* fragmentPath);
         ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
@@ -30,6 +29,8 @@ namespace Shading
         void UpdateLightsBuffer(const glm::mat4& viewMatrix) const;
 
     private:
+        static const char* GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock);
+
         std::vector<std::unique_ptr<ShaderProgram>> mShaderProgramList;
 
         unsigned int mUBOMatrices;

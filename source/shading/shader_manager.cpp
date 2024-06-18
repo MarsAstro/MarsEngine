@@ -87,12 +87,10 @@ const char* ShaderManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformB
 {
     switch (uniformBlock)
     {
-        case Matrices:
-            return "Matrices";
-        case PointLights:
-            return "PointLights";
-        default:
-            return "";
+        case Matrices:      return "Matrices";
+        case PointLights:   return "PointLights";
+        case Materials:     return "Materials";
+        default:            return "";
     }
 }
 
