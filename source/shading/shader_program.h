@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <glm.hpp>
+#include <../../libraries/glm/glm.hpp>
 
 namespace Shading
 {

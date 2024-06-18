@@ -10,12 +10,12 @@
 using std::vector;
 using std::string;
 
-float Utility::Clamp(float d, float min, float max) {
+float Utility::Clamp(const float d, const float min, const float max) {
     const float t = d < min ? min : d;
     return t > max ? max : t;
 }
 
-GLFWwindow* Utility::SetupGLFWWindow(int windowWith, int windowHeight, int msaa, const char* title)
+GLFWwindow* Utility::SetupGLFWWindow(const int windowWith, const int windowHeight, const int msaa, const char* title)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -42,7 +42,7 @@ GLFWwindow* Utility::SetupGLFWWindow(int windowWith, int windowHeight, int msaa,
 
 int Utility::InitializeGLADLoader()
 {
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;

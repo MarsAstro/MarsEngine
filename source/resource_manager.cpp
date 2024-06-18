@@ -1,12 +1,11 @@
-#include "shader_manager.h"
+#include "resource_manager.h"
 
-#include <gtc/type_ptr.hpp>
-#include "glad/glad.h"
+#include <../libraries/glm/gtc/type_ptr.hpp>
+#include "../libraries/glad/include/glad/glad.h"
 
-using Shading::ShaderManager;
 using Shading::ShaderProgram;
 
-ShaderManager::ShaderManager() : lightManager(MAX_POINT_LIGHTS)
+ResourceManager::ResourceManager() : lightManager(MAX_POINT_LIGHTS)
 {
     /*
      * Create Matrices buffer
@@ -33,14 +32,14 @@ ShaderManager::ShaderManager() : lightManager(MAX_POINT_LIGHTS)
     glBindBufferBase(GL_UNIFORM_BUFFER, 1, mUBOPointLights);
 }
 
-ShaderProgram* ShaderManager::CreateShaderProgram(const char *vertexPath, const char *fragmentPath)
+ShaderProgram* ResourceManager::CreateShaderProgram(const char *vertexPath, const char *fragmentPath)
 {
     mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, fragmentPath));
 
     return mShaderProgramList.back().get();
 }
 
-ShaderProgram* ShaderManager::CreateShaderProgram(const char* vertexPath, const char* fragmentPath,
+ShaderProgram* ResourceManager::CreateShaderProgram(const char* vertexPath, const char* fragmentPath,
     const std::initializer_list<ShaderUniformBlock> uniformBlocks)
 {
     mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, fragmentPath));
@@ -58,14 +57,14 @@ ShaderProgram* ShaderManager::CreateShaderProgram(const char* vertexPath, const 
     return newShader;
 }
 
-ShaderProgram * ShaderManager::CreateShaderProgram(const char *vertexPath,const char *geometryPath, const char *fragmentPath)
+ShaderProgram * ResourceManager::CreateShaderProgram(const char *vertexPath,const char *geometryPath, const char *fragmentPath)
 {
     mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, geometryPath, fragmentPath));
 
     return mShaderProgramList.back().get();
 }
 
-ShaderProgram * ShaderManager::CreateShaderProgram(const char *vertexPath, const char *geometryPath, const char *fragmentPath,
+ShaderProgram * ResourceManager::CreateShaderProgram(const char *vertexPath, const char *geometryPath, const char *fragmentPath,
     std::initializer_list<ShaderUniformBlock> uniformBlocks)
 {
     mShaderProgramList.push_back(std::make_unique<ShaderProgram>(vertexPath, geometryPath, fragmentPath));
@@ -83,7 +82,7 @@ ShaderProgram * ShaderManager::CreateShaderProgram(const char *vertexPath, const
     return newShader;
 }
 
-const char* ShaderManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock)
+const char* ResourceManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock)
 {
     switch (uniformBlock)
     {
@@ -94,7 +93,7 @@ const char* ShaderManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformB
     }
 }
 
-void ShaderManager::SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const
+void ResourceManager::SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const
 {
     glm::mat4 matrices[] = { view, projection };
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOMatrices);
@@ -102,16 +101,16 @@ void ShaderManager::SetMatrices(const glm::mat4 &view, const glm::mat4 &projecti
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void ShaderManager::SetViewMatrix(glm::mat4 view) const
+void ResourceManager::SetViewMatrix(glm::mat4 view) const
 {
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOMatrices);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void ShaderManager::UpdateLightsBuffer(const glm::mat4 &viewMatrix) const
+void ResourceManager::UpdateLightsBuffer(const glm::mat4 &viewMatrix) const
 {
-    std::vector<Lighting::PointLight> pointLights = lightManager.GetViewSpacePointLights(viewMatrix);
+    std::vector<Shading::Lighting::PointLight> pointLights = lightManager.GetViewSpacePointLights(viewMatrix);
     int numPointlights = lightManager.GetNumberOfPointLights();
 
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOPointLights);

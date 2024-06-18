@@ -12,10 +12,9 @@
 #include "utility/utility_functions.h"
 #include "assets/import_functions.h"
 #include "geometry/geometry_functions.h"
-#include "shading/shader_manager.h"
+#include "resource_manager.h"
 #include "geometry/model.h"
 
-using Shading::ShaderManager;
 using Shading::ShaderProgram;
 using Geometry::Model;
 
@@ -28,11 +27,11 @@ int screenHeight = SCREEN_HEIGHT;
 namespace MainFunctions
 {
     // Scenes
-    void EmptyScene(GLFWwindow *window, ShaderManager& shaderManager);
-    void SpaceScene(GLFWwindow *window, ShaderManager& shaderManager);
-    void Playground(GLFWwindow *window, ShaderManager& shaderManager);
-    void GeometryHousesScene(GLFWwindow *window, ShaderManager& shaderManager);
-    void ModelViewer(GLFWwindow *window, ShaderManager& shaderManager);
+    void EmptyScene(GLFWwindow *window, ResourceManager& shaderManager);
+    void SpaceScene(GLFWwindow *window, ResourceManager& shaderManager);
+    void Playground(GLFWwindow *window, ResourceManager& shaderManager);
+    void GeometryHousesScene(GLFWwindow *window, ResourceManager& shaderManager);
+    void ModelViewer(GLFWwindow *window, ResourceManager& shaderManager);
 
     // Input stuff
     void ProcessInput(GLFWwindow* window);
@@ -75,7 +74,7 @@ int main()
     glfwSetCursorPosCallback(window, MainFunctions::MouseCallback);
     glfwSetScrollCallback(window, MainFunctions::ScrollCallback);
 
-    ShaderManager shaderManager = ShaderManager();
+    ResourceManager shaderManager = ResourceManager();
 
     MainFunctions::Playground(window, shaderManager);
 
@@ -83,7 +82,7 @@ int main()
     return 0;
 }
 
-void MainFunctions::EmptyScene(GLFWwindow *window, ShaderManager &shaderManager)
+void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &shaderManager)
 {
     glEnable(GL_DEPTH_TEST);
 
@@ -108,16 +107,16 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ShaderManager &shaderManager)
     }
 }
 
-void MainFunctions::SpaceScene(GLFWwindow *window, ShaderManager &shaderManager)
+void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &shaderManager)
 {
     ShaderProgram* unlitShader = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/simple_diffuse_unlit.frag",
-        { Shading::Matrices });
+        { Matrices });
     ShaderProgram* instancedUnlitShader = shaderManager.CreateShaderProgram(
         "shaders/general/default_instanced.vert",
         "shaders/lighting/simple_diffuse_unlit.frag",
-        { Shading::Matrices });
+        { Matrices });
 
     Model planet = Model("assets/models/planet/planet.obj");
     Model asteroid = Model("assets/models/rock/rock.obj");
@@ -212,32 +211,32 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ShaderManager &shaderManager)
     delete[] modelMatrices;
 }
 
-void MainFunctions::Playground(GLFWwindow *window, ShaderManager& shaderManager)
+void MainFunctions::Playground(GLFWwindow *window, ResourceManager& shaderManager)
 {
     ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
-        { Shading::Matrices, Shading::PointLights });
+        { Matrices, PointLights });
     ShaderProgram* windowShader         = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/transparent_texture.frag",
-        { Shading::Matrices });
+        { Matrices });
     ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/solid_color.frag",
-        { Shading::Matrices });
+        { Matrices });
     ShaderProgram* reflectionShader     = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/skybox_reflection.frag",
-        { Shading::Matrices });
+        { Matrices });
     ShaderProgram* refractionShader     = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/skybox_refraction.frag",
-        { Shading::Matrices });
+        { Matrices });
     ShaderProgram* skyboxShader         = shaderManager.CreateShaderProgram(
         "shaders/general/skybox.vert",
         "shaders/general/skybox.frag",
-        { Shading::Matrices });
+        { Matrices });
     ShaderProgram* screenSpaceShader    = shaderManager.CreateShaderProgram(
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
@@ -443,7 +442,7 @@ void MainFunctions::Playground(GLFWwindow *window, ShaderManager& shaderManager)
     CleanupFramebuffer();
 }
 
-void MainFunctions::GeometryHousesScene(GLFWwindow* window, ShaderManager& shaderManager)
+void MainFunctions::GeometryHousesScene(GLFWwindow* window, ResourceManager& shaderManager)
 {
     ShaderProgram* pointsShader    = shaderManager.CreateShaderProgram(
         "shaders/general/point_houses.vert",
@@ -488,12 +487,12 @@ void MainFunctions::GeometryHousesScene(GLFWwindow* window, ShaderManager& shade
     }
 }
 
-void MainFunctions::ModelViewer(GLFWwindow *window, ShaderManager &shaderManager)
+void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &shaderManager)
 {
     ShaderProgram* objectShader = shaderManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/simple_diffuse_unlit.frag",
-        { Shading::Matrices, Shading::PointLights });
+        { Matrices, PointLights });
 
     stbi_set_flip_vertically_on_load(true);
     Model loadedModel = Model("assets/models/shanalotte/Shanalotte.obj");

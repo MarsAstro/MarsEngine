@@ -5,11 +5,11 @@
 #include <sstream>
 #include <iostream>
 
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
+#include <../../libraries/glm/glm.hpp>
+#include <../../libraries/glm/gtc/matrix_transform.hpp>
+#include <../../libraries/glm/gtc/type_ptr.hpp>
 
-#include <glad/glad.h>
+#include <../../libraries/glad/include/glad/glad.h>
 
 using Shading::ShaderProgram;
 
