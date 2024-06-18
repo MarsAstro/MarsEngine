@@ -101,7 +101,7 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ShaderManager &shaderManager)
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
-        shaderManager.SetViewAndProjectionMatrices(view, projection);
+        shaderManager.SetMatrices(view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -197,7 +197,7 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ShaderManager &shaderManager)
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 500.0f);
 
-        shaderManager.SetViewAndProjectionMatrices(view, projection);
+        shaderManager.SetMatrices(view, projection);
 
         unlitShader->Use();
         planet.Draw(unlitShader);
@@ -318,7 +318,7 @@ void MainFunctions::Playground(GLFWwindow *window, ShaderManager& shaderManager)
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
-        shaderManager.SetViewAndProjectionMatrices(view, projection);
+        shaderManager.SetMatrices(view, projection);
 
         shaderManager.lightManager.MovePointLight(0, glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f));
         shaderManager.lightManager.MovePointLight(1, glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0));
@@ -518,7 +518,7 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ShaderManager &shaderManager
 
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
-        shaderManager.SetViewAndProjectionMatrices(view, projection);
+        shaderManager.SetMatrices(view, projection);
 
         shaderManager.lightManager.MovePointLight(0, camera.Position);
         shaderManager.UpdateLightsBuffer(view);

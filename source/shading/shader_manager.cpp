@@ -96,7 +96,7 @@ const char* ShaderManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformB
     }
 }
 
-void ShaderManager::SetViewAndProjectionMatrices(const glm::mat4 &view, const glm::mat4 &projection) const
+void ShaderManager::SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const
 {
     glm::mat4 matrices[] = { view, projection };
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOMatrices);
@@ -108,13 +108,6 @@ void ShaderManager::SetViewMatrix(glm::mat4 view) const
 {
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOMatrices);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void ShaderManager::SetProjectionMatrix(glm::mat4 projection) const
-{
-    glBindBuffer(GL_UNIFORM_BUFFER, mUBOMatrices);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
