@@ -82,6 +82,11 @@ ShaderProgram * ResourceManager::CreateShaderProgram(const char *vertexPath, con
     return newShader;
 }
 
+Geometry::Model ResourceManager::LoadModel(const char *modelPath)
+{
+    return Geometry::Model(modelPath);
+}
+
 const char* ResourceManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock)
 {
     switch (uniformBlock)

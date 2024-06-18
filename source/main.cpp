@@ -27,11 +27,11 @@ int screenHeight = SCREEN_HEIGHT;
 namespace MainFunctions
 {
     // Scenes
-    void EmptyScene(GLFWwindow *window, ResourceManager& shaderManager);
-    void SpaceScene(GLFWwindow *window, ResourceManager& shaderManager);
-    void Playground(GLFWwindow *window, ResourceManager& shaderManager);
-    void GeometryHousesScene(GLFWwindow *window, ResourceManager& shaderManager);
-    void ModelViewer(GLFWwindow *window, ResourceManager& shaderManager);
+    void EmptyScene(GLFWwindow *window, ResourceManager& resourceManager);
+    void SpaceScene(GLFWwindow *window, ResourceManager& resourceManager);
+    void Playground(GLFWwindow *window, ResourceManager& resourceManager);
+    void GeometryHousesScene(GLFWwindow *window, ResourceManager& resourceManager);
+    void ModelViewer(GLFWwindow *window, ResourceManager& resourceManager);
 
     // Input stuff
     void ProcessInput(GLFWwindow* window);
@@ -82,7 +82,7 @@ int main()
     return 0;
 }
 
-void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &shaderManager)
+void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &resourceManager)
 {
     glEnable(GL_DEPTH_TEST);
 
@@ -100,26 +100,26 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &shaderManage
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
-        shaderManager.SetMatrices(view, projection);
+        resourceManager.SetMatrices(view, projection);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 }
 
-void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &shaderManager)
+void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &resourceManager)
 {
-    ShaderProgram* unlitShader = shaderManager.CreateShaderProgram(
+    ShaderProgram* unlitShader = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/simple_diffuse_unlit.frag",
         { Matrices });
-    ShaderProgram* instancedUnlitShader = shaderManager.CreateShaderProgram(
+    ShaderProgram* instancedUnlitShader = resourceManager.CreateShaderProgram(
         "shaders/general/default_instanced.vert",
         "shaders/lighting/simple_diffuse_unlit.frag",
         { Matrices });
 
-    Model planet = Model("assets/models/planet/planet.obj");
-    Model asteroid = Model("assets/models/rock/rock.obj");
+    Model planet = resourceManager.LoadModel("assets/models/planet/planet.obj");
+    Model asteroid = resourceManager.LoadModel("assets/models/rock/rock.obj");
 
     camera.Position = glm::vec3(0.0f, 0.0f, 40.0f);
     planet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
@@ -196,7 +196,7 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &shaderManage
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 500.0f);
 
-        shaderManager.SetMatrices(view, projection);
+        resourceManager.SetMatrices(view, projection);
 
         unlitShader->Use();
         planet.Draw(unlitShader);
@@ -211,48 +211,48 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &shaderManage
     delete[] modelMatrices;
 }
 
-void MainFunctions::Playground(GLFWwindow *window, ResourceManager& shaderManager)
+void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceManager)
 {
-    ShaderProgram* objectShader         = shaderManager.CreateShaderProgram(
+    ShaderProgram* objectShader         = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/blinn-phong/point_lights.frag",
         { Matrices, PointLights });
-    ShaderProgram* windowShader         = shaderManager.CreateShaderProgram(
+    ShaderProgram* windowShader         = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/transparent_texture.frag",
         { Matrices });
-    ShaderProgram* solidColorShader     = shaderManager.CreateShaderProgram(
+    ShaderProgram* solidColorShader     = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/solid_color.frag",
         { Matrices });
-    ShaderProgram* reflectionShader     = shaderManager.CreateShaderProgram(
+    ShaderProgram* reflectionShader     = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/skybox_reflection.frag",
         { Matrices });
-    ShaderProgram* refractionShader     = shaderManager.CreateShaderProgram(
+    ShaderProgram* refractionShader     = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/general/skybox_refraction.frag",
         { Matrices });
-    ShaderProgram* skyboxShader         = shaderManager.CreateShaderProgram(
+    ShaderProgram* skyboxShader         = resourceManager.CreateShaderProgram(
         "shaders/general/skybox.vert",
         "shaders/general/skybox.frag",
         { Matrices });
-    ShaderProgram* screenSpaceShader    = shaderManager.CreateShaderProgram(
+    ShaderProgram* screenSpaceShader    = resourceManager.CreateShaderProgram(
         "shaders/post_processing/default_screen_space.vert",
         "shaders/post_processing/default_screen_space.frag");
 
-    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
+    resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
                                              1.0f, 0.045f, 0.0075f);
-    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
+    resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
                                              1.0f, 0.045f, 0.0075f);
-    shaderManager.lightManager.AddPointLight(glm::vec3(-15.0f, -1.0f, -15.0f),
+    resourceManager.lightManager.AddPointLight(glm::vec3(-15.0f, -1.0f, -15.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f),glm::vec3(1.0f),
                                              1.0f, 0.045f, 0.0075f);
 
-    Model backpack = Model("assets/models/backpack/backpack.obj");
-    Model floor = Model("assets/models/floor/floor.obj");
+    Model backpack = resourceManager.LoadModel("assets/models/backpack/backpack.obj");
+    Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
@@ -317,11 +317,11 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& shaderManage
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
-        shaderManager.SetMatrices(view, projection);
+        resourceManager.SetMatrices(view, projection);
 
-        shaderManager.lightManager.MovePointLight(0, glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f));
-        shaderManager.lightManager.MovePointLight(1, glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0));
-        shaderManager.UpdateLightsBuffer(view);
+        resourceManager.lightManager.MovePointLight(0, glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f));
+        resourceManager.lightManager.MovePointLight(1, glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0));
+        resourceManager.UpdateLightsBuffer(view);
 
         /*
          * Draw solid objects
@@ -356,7 +356,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& shaderManage
         glDisable(GL_CULL_FACE);
 
         solidColorShader->Use();
-        shaderManager.lightManager.DrawPointLightCubes(solidColorShader);
+        resourceManager.lightManager.DrawPointLightCubes(solidColorShader);
 
         glEnable(GL_CULL_FACE);
 
@@ -367,11 +367,11 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& shaderManage
 
         skyboxShader->Use();
 
-        shaderManager.SetViewMatrix(glm::mat4(glm::mat3(view)));
+        resourceManager.SetViewMatrix(glm::mat4(glm::mat3(view)));
         glBindVertexArray(skyboxVAO);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        shaderManager.SetViewMatrix(view);
+        resourceManager.SetViewMatrix(view);
 
         glDepthFunc(GL_LESS);
 
@@ -442,9 +442,9 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& shaderManage
     CleanupFramebuffer();
 }
 
-void MainFunctions::GeometryHousesScene(GLFWwindow* window, ResourceManager& shaderManager)
+void MainFunctions::GeometryHousesScene(GLFWwindow* window, ResourceManager& resourceManager)
 {
-    ShaderProgram* pointsShader    = shaderManager.CreateShaderProgram(
+    ShaderProgram* pointsShader    = resourceManager.CreateShaderProgram(
         "shaders/general/point_houses.vert",
         "shaders/general/point_houses.geom",
         "shaders/general/point_houses.frag");
@@ -487,18 +487,18 @@ void MainFunctions::GeometryHousesScene(GLFWwindow* window, ResourceManager& sha
     }
 }
 
-void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &shaderManager)
+void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &resourceManager)
 {
-    ShaderProgram* objectShader = shaderManager.CreateShaderProgram(
+    ShaderProgram* objectShader = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
         "shaders/lighting/simple_diffuse_unlit.frag",
         { Matrices, PointLights });
 
     stbi_set_flip_vertically_on_load(true);
-    Model loadedModel = Model("assets/models/shanalotte/Shanalotte.obj");
+    Model loadedModel = resourceManager.LoadModel("assets/models/shanalotte/Shanalotte.obj");
     loadedModel.scale = glm::vec3(0.2f);
 
-    shaderManager.lightManager.AddPointLight(glm::vec3(0.0f),
+    resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
                                              1.0f, 0.014f, 0.0007f);
 
@@ -517,10 +517,10 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &shaderManag
 
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
-        shaderManager.SetMatrices(view, projection);
+        resourceManager.SetMatrices(view, projection);
 
-        shaderManager.lightManager.MovePointLight(0, camera.Position);
-        shaderManager.UpdateLightsBuffer(view);
+        resourceManager.lightManager.MovePointLight(0, camera.Position);
+        resourceManager.UpdateLightsBuffer(view);
 
         /*
          * Draw shapes

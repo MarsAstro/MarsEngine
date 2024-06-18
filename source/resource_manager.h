@@ -4,6 +4,7 @@
 #include <memory>
 #include "shading/shader_program.h"
 #include "shading/lighting/light_manager.h"
+#include "geometry/model.h"
 
 enum ShaderUniformBlock
 {
@@ -21,6 +22,8 @@ public:
     Shading::ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
     Shading::ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* geometryPath, const char* fragmentPath);
     Shading::ShaderProgram* CreateShaderProgram(const char* vertexPath, const char* geometryPath, const char* fragmentPath, std::initializer_list<ShaderUniformBlock> uniformBlocks);
+
+    Geometry::Model LoadModel(const char* modelPath);
 
     void SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const;
     void SetViewMatrix(glm::mat4 view) const;
