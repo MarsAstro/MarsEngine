@@ -8,12 +8,11 @@ namespace Geometry
     public:
         explicit Model(const char* path, std::vector<Material>* materials);
         void Draw(const Shading::ShaderProgram* shaderProgram) const;
-        void DrawInstanced(const Shading::ShaderProgram* shaderProgram, int amount) const;
+        void DrawInstanced(int amount) const;
 
         glm::vec3 position;
         glm::vec3 scale;
         std::vector<Mesh> mMeshes;
-        std::vector<Material> mMaterials;
 
     private:
         static std::vector<Material> ReadMaterialFile(std::stringstream &objLineStream, const char *objPath);

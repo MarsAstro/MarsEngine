@@ -65,7 +65,6 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials) : pos
 
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        mMaterials = *materials;
 
         for (const Face& face : faces)
         {
@@ -81,7 +80,7 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials) : pos
                     vertexPositions[vertexPosIndex],
                     vertexNormals[vertexNormIndex],
                     textureCoordinates[texCoordIndex],
-                    GetMaterialIndex(face.materialName, mMaterials)
+                    GetMaterialIndex(face.materialName, *materials)
                 });
             }
 
@@ -108,13 +107,13 @@ void Geometry::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
     shaderProgram->SetMat4("model", model);
 
     for (const Mesh& mesh : mMeshes)
-        mesh.Draw(shaderProgram, mMaterials);
+        mesh.Draw();
 }
 
-void Geometry::Model::DrawInstanced(const Shading::ShaderProgram* shaderProgram, const int amount) const
+void Geometry::Model::DrawInstanced(const int amount) const
 {
     for (const Mesh& mesh : mMeshes)
-        mesh.DrawInstanced(shaderProgram, mMaterials, amount);
+        mesh.DrawInstanced(amount);
 }
 
 std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstream &objLineStream,

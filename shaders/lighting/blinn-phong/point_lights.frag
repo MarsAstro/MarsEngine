@@ -16,7 +16,7 @@ struct Material {
 
     float shininess;
 };
-#define MAX_MATERIALS 12
+#define MAX_MATERIALS 64
 uniform Material materials[MAX_MATERIALS];
 
 struct Surface {

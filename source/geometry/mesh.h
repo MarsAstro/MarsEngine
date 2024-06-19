@@ -14,13 +14,10 @@ namespace Geometry
 
         Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 
-        void Draw(const Shading::ShaderProgram* shader, const std::vector<Material>& materials) const;
-        void DrawInstanced(const Shading::ShaderProgram* shader, const std::vector<Material>& materials, int amount) const;
+        void Draw() const;
+        void DrawInstanced(int amount) const;
 
         unsigned int VAO, VBO, EBO;
-
-    private:
-        static void SetMaterials(const Shading::ShaderProgram *shader, const std::vector<Material> &materials);
     };
 }
 

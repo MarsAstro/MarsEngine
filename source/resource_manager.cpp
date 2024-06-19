@@ -17,7 +17,7 @@ ResourceManager::ResourceManager() : lightManager(MAX_POINT_LIGHTS)
     glBufferData(GL_UNIFORM_BUFFER, matricesSize, nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, mUBOMatrices);
+    glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, mUBOMatrices);
 
     /*
      * Create Lights buffer
@@ -29,7 +29,7 @@ ResourceManager::ResourceManager() : lightManager(MAX_POINT_LIGHTS)
     glBufferData(GL_UNIFORM_BUFFER, pointlightsSize, nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, mUBOPointLights);
+    glBindBufferBase(GL_UNIFORM_BUFFER, PointLights, mUBOPointLights);
 }
 
 ShaderProgram* ResourceManager::CreateShaderProgram(const char *vertexPath, const char *fragmentPath)
@@ -85,7 +85,6 @@ ShaderProgram * ResourceManager::CreateShaderProgram(const char *vertexPath, con
 Geometry::Model ResourceManager::LoadModel(const char *modelPath)
 {
     Geometry::Model newModel = Geometry::Model(modelPath, &mMaterials);
-    UpdateMaterialsBuffer();
 
     return newModel;
 }
@@ -96,14 +95,8 @@ const char* ResourceManager::GetUniformBlockLayoutName(ShaderUniformBlock unifor
     {
         case Matrices:      return "Matrices";
         case PointLights:   return "PointLights";
-        case Materials:     return "Materials";
         default:            return "";
     }
-}
-
-void ResourceManager::UpdateMaterialsBuffer()
-{
-
 }
 
 void ResourceManager::SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const
@@ -119,6 +112,39 @@ void ResourceManager::SetViewMatrix(glm::mat4 view) const
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOMatrices);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void ResourceManager::SetMaterials(const ShaderProgram* shader) const
+{
+    shader->Use();
+
+    for (int i = 0; i < mMaterials.size(); ++i)
+    {
+        std::string prefix = "materials[" + std::to_string(i) + "].";
+        shader->SetVec3(prefix + "ambientColor", mMaterials[i].ambientColor);
+        shader->SetVec3(prefix + "diffuseColor", mMaterials[i].diffuseColor);
+        shader->SetVec3(prefix + "specularColor", mMaterials[i].specularColor);
+        shader->SetVec3(prefix + "emissiveColor", mMaterials[i].emissiveColor);
+
+        shader->SetFloat(prefix + "shininess", mMaterials[i].shininess);
+
+        int textureIndex = i * 2;
+        glActiveTexture(GL_TEXTURE0 + textureIndex);
+        glBindTexture(GL_TEXTURE_2D, mMaterials[i].diffuseMap);
+        shader->SetInt(prefix + "diffuseMap", textureIndex);
+        shader->SetBool(prefix + "hasDiffuseMap", mMaterials[i].hasDiffuseMap);
+
+        ++textureIndex;
+        glActiveTexture(GL_TEXTURE0 + textureIndex);
+        glBindTexture(GL_TEXTURE_2D, mMaterials[i].specularMap);
+        shader->SetInt(prefix + "specularMap", textureIndex);
+        shader->SetBool(prefix + "hasSpecularMap", mMaterials[i].hasSpecularMap);
+    }
+}
+
+int ResourceManager::GetTextureCount() const
+{
+    return mMaterials.size() * 2;
 }
 
 void ResourceManager::UpdateLightsBuffer(const glm::mat4 &viewMatrix) const

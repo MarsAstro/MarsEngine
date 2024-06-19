@@ -120,6 +120,8 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &resourceMana
 
     Model planet = resourceManager.LoadModel("assets/models/planet/planet.obj");
     Model asteroid = resourceManager.LoadModel("assets/models/rock/rock.obj");
+    resourceManager.SetMaterials(unlitShader);
+    resourceManager.SetMaterials(instancedUnlitShader);
 
     camera.Position = glm::vec3(0.0f, 0.0f, 40.0f);
     planet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
@@ -202,7 +204,7 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &resourceMana
         planet.Draw(unlitShader);
 
         instancedUnlitShader->Use();
-        asteroid.DrawInstanced(instancedUnlitShader, amount);
+        asteroid.DrawInstanced(amount);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -327,7 +329,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
          * Draw solid objects
          */
         objectShader->Use();
-        objectShader->SetFloat("material.shininess", 64.0f);
+        resourceManager.SetMaterials(objectShader);
 
         backpack.Draw(objectShader);
         floor.Draw(objectShader);
@@ -497,6 +499,7 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &resourceMan
     stbi_set_flip_vertically_on_load(true);
     Model loadedModel = resourceManager.LoadModel("assets/models/shanalotte/Shanalotte.obj");
     loadedModel.scale = glm::vec3(0.2f);
+    resourceManager.SetMaterials(objectShader);
 
     resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),

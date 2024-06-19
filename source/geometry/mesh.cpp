@@ -32,46 +32,16 @@ Geometry::Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<unsi
     glVertexAttribIPointer(3, 1, GL_INT, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, materialIndex)));
 }
 
-void Geometry::Mesh::Draw(const Shading::ShaderProgram* shader, const std::vector<Material>& materials) const
+void Geometry::Mesh::Draw() const
 {
-    SetMaterials(shader, materials);
-
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 
-void Geometry::Mesh::DrawInstanced(const Shading::ShaderProgram *shader, const std::vector<Material> &materials, const int amount) const
+void Geometry::Mesh::DrawInstanced(const int amount) const
 {
-    SetMaterials(shader, materials);
-
     glBindVertexArray(VAO);
     glDrawElementsInstanced(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr, amount);
     glBindVertexArray(0);
-}
-
-void Geometry::Mesh::SetMaterials(const Shading::ShaderProgram* shader, const std::vector<Material> &materials)
-{
-    for (int i = 0; i < materials.size(); ++i)
-    {
-        std::string prefix = "materials[" + std::to_string(i) + "].";
-        shader->SetVec3(prefix + "ambientColor", materials[i].ambientColor);
-        shader->SetVec3(prefix + "diffuseColor", materials[i].diffuseColor);
-        shader->SetVec3(prefix + "specularColor", materials[i].specularColor);
-        shader->SetVec3(prefix + "emissiveColor", materials[i].emissiveColor);
-
-        shader->SetFloat(prefix + "shininess", materials[i].shininess);
-
-        int textureIndex = i * 2;
-        glActiveTexture(GL_TEXTURE0 + textureIndex);
-        glBindTexture(GL_TEXTURE_2D, materials[i].diffuseMap);
-        shader->SetInt(prefix + "diffuseMap", textureIndex);
-        shader->SetBool(prefix + "hasDiffuseMap", materials[i].hasDiffuseMap);
-
-        ++textureIndex;
-        glActiveTexture(GL_TEXTURE0 + textureIndex);
-        glBindTexture(GL_TEXTURE_2D, materials[i].specularMap);
-        shader->SetInt(prefix + "specularMap", textureIndex);
-        shader->SetBool(prefix + "hasSpecularMap", materials[i].hasSpecularMap);
-    }
 }
