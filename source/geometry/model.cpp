@@ -10,7 +10,7 @@
 
 #include "../assets/import_functions.h"
 
-Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f)
+Geometry::Model::Model(const char *path, std::vector<Material>* materials) : position(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f)
 {
     std::ifstream object;
     object.exceptions(std::ifstream::badbit);
@@ -48,7 +48,7 @@ Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f), scale(1.0
             lineStream >> lineWord;
 
             if (lineWord == "mtllib")
-                mMaterials = ReadMaterialFile(lineStream, path);
+                materials->append_range(ReadMaterialFile(lineStream, path));
             else if (lineWord == "v")
                 vertexPositions.push_back(ReadVec3FromLine(lineStream));
             else if (lineWord == "vn")
@@ -65,6 +65,7 @@ Geometry::Model::Model(const char *path) : position(0.0f, 0.0f, 0.0f), scale(1.0
 
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
+        mMaterials = *materials;
 
         for (const Face& face : faces)
         {

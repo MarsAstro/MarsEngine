@@ -84,7 +84,10 @@ ShaderProgram * ResourceManager::CreateShaderProgram(const char *vertexPath, con
 
 Geometry::Model ResourceManager::LoadModel(const char *modelPath)
 {
-    return Geometry::Model(modelPath);
+    Geometry::Model newModel = Geometry::Model(modelPath, &mMaterials);
+    UpdateMaterialsBuffer();
+
+    return newModel;
 }
 
 const char* ResourceManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock)
@@ -96,6 +99,11 @@ const char* ResourceManager::GetUniformBlockLayoutName(ShaderUniformBlock unifor
         case Materials:     return "Materials";
         default:            return "";
     }
+}
+
+void ResourceManager::UpdateMaterialsBuffer()
+{
+
 }
 
 void ResourceManager::SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const

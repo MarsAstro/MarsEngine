@@ -32,7 +32,10 @@ public:
 private:
     static const char* GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock);
 
+    void UpdateMaterialsBuffer();
+
     std::vector<std::unique_ptr<Shading::ShaderProgram>> mShaderProgramList;
+    std::vector<Geometry::Material> mMaterials;
 
     unsigned int mUBOMatrices;
     unsigned int mUBOPointLights;
@@ -41,6 +44,7 @@ private:
     const unsigned int MAX_POINT_LIGHTS = 64;
     const unsigned int SIZEOF_POINT_LIGHT = 20 * sizeof(float);
     const unsigned int POINT_LIGHTS_ARRAY_SIZE = MAX_POINT_LIGHTS * SIZEOF_POINT_LIGHT;
+    const unsigned int MAX_MATERIALS = 128;
 
 public:
     Shading::Lighting::LightManager lightManager;

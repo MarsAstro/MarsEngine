@@ -6,7 +6,7 @@ namespace Geometry
 {
     class Model {
     public:
-        explicit Model(const char* path);
+        explicit Model(const char* path, std::vector<Material>* materials);
         void Draw(const Shading::ShaderProgram* shaderProgram) const;
         void DrawInstanced(const Shading::ShaderProgram* shaderProgram, int amount) const;
 
