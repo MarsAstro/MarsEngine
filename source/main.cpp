@@ -253,9 +253,8 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
                                              glm::vec3(0.05f), glm::vec3(0.5f),glm::vec3(1.0f),
                                              1.0f, 0.045f, 0.0075f);
 
-    Model backpack = resourceManager.LoadModel("assets/models/backpack/backpack.obj");
-    Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
-    floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
+    SetupFramebuffer();
+    unsigned int drawBuffer = MSAA > 0 ? msaaFramebuffer : framebuffer;
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
     Geometry::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
@@ -276,16 +275,28 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         "assets/textures/yokohama/front.jpg",
         "assets/textures/yokohama/back.jpg"
     };
-    stbi_set_flip_vertically_on_load(false);
     skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_RGB, GL_RGB);
-    stbi_set_flip_vertically_on_load(true);
 
     std::vector<glm::vec3> windowObjects;
     windowObjects.emplace_back(0.0f, -1.0f, -5.0f);
     windowObjects.emplace_back(0.0f, -1.0f,  7.0f);
 
-    SetupFramebuffer();
-    unsigned int drawBuffer = MSAA > 0 ? msaaFramebuffer : framebuffer;
+    Model backpack = resourceManager.LoadModel("assets/models/backpack/backpack.obj");
+    Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
+
+    int textureCount = resourceManager.GetTextureCount();
+    screenSpaceShader->Use();
+    screenSpaceShader->SetInt("screenTexture", textureCount);
+    glActiveTexture(GL_TEXTURE0 + textureCount++);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+
+    windowShader->Use();
+    windowShader->SetInt("texture1", textureCount);
+    glActiveTexture(GL_TEXTURE0 + textureCount++);
+    glBindTexture(GL_TEXTURE_2D, windowTexture);
+
+    resourceManager.SetMaterials(objectShader);
+    floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     glEnable(GL_STENCIL_TEST);
     glEnable(GL_CULL_FACE);
@@ -329,7 +340,6 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
          * Draw solid objects
          */
         objectShader->Use();
-        resourceManager.SetMaterials(objectShader);
 
         backpack.Draw(objectShader);
         floor.Draw(objectShader);
@@ -381,13 +391,9 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         * Draw transparent objects
         */
         windowShader->Use();
-        windowShader->SetInt("texture1", 0);
 
         glBindVertexArray(windowVAO);
         glDisable(GL_CULL_FACE);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, windowTexture);
 
         std::map<float, glm::vec3> sorted;
         for (glm::vec3 windowObject : windowObjects)
@@ -415,7 +421,10 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         * SCREEN SPACE DRAW PASS
         *
         */
-        if (MSAA > 0)
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        if constexpr (MSAA > 0)
         {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFramebuffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
@@ -426,12 +435,8 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        screenSpaceShader->Use();
         glBindVertexArray(screenVAO);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
+        screenSpaceShader->Use();
 
         glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, nullptr);
 
@@ -599,7 +604,7 @@ void MainFunctions::SetupFramebuffer()
     glBindTexture(GL_TEXTURE_2D, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
 
-    if (MSAA <= 0)
+    if constexpr (MSAA <= 0)
     {
         glGenRenderbuffers(1, &renderbuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);

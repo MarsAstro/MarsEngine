@@ -49,12 +49,12 @@ void LightManager::MovePointLight(unsigned int index, glm::vec3 newPosition)
     pointLights[index].position = glm::vec4(newPosition, 1.0f);
 }
 
-void LightManager::DrawPointLightCubes(ShaderProgram *shaderProgram) const
+void LightManager::DrawPointLightCubes(const ShaderProgram *shaderProgram) const
 {
     for (int i = 0; i < mNumPointLights; ++i)
     {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(pointLights[i].position));
+        model = translate(model, glm::vec3(pointLights[i].position));
 
         glm::vec3 diffuse = glm::vec3(pointLights[i].diffuse);
         glm::vec3 color = (1.0f / diffuse) * diffuse;

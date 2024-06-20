@@ -51,7 +51,6 @@ unsigned int Assets::LoadTexture(const char* texturePath, GLenum internalFormat,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    stbi_set_flip_vertically_on_load(true);
     int width, height, nrChannels;
     unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
 
