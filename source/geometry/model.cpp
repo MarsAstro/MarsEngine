@@ -59,8 +59,6 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials) : pos
                 lineStream >> currentMaterialName;
             else if (lineWord == "f")
                 faces.push_back(ReadFaceFromLine(lineStream, currentMaterialName));
-            else if (lineWord == "o" && !vertexPositions.empty())
-                break;
         }
 
         std::vector<Vertex> vertices;
