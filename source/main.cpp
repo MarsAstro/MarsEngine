@@ -76,7 +76,7 @@ int main()
 
     ResourceManager shaderManager = ResourceManager();
 
-    MainFunctions::SpaceScene(window, shaderManager);
+    MainFunctions::Playground(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -306,6 +306,9 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
 
         ProcessInput(window);
 
+        /*
+         * Common shader setup
+         */
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
@@ -324,7 +327,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         floor.Draw(objectShader);
 
         /*
-         * Draw environment mapped objects
+         * Draw environment-mapped objects
          */
         reflectionShader->Use();
         reflectionShader->SetVec3("cameraPos", camera.Position);
