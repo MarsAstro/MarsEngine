@@ -9,14 +9,9 @@ namespace Geometry
 {
     class Mesh {
     public:
-        std::vector<Vertex> mVertices;
-        std::vector<unsigned int> mIndices;
+        void SetupMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 
-        Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
-
-        void Draw() const;
-        void DrawInstanced(int amount) const;
-
+        std::vector<unsigned int> indices;
         unsigned int VAO, VBO, EBO;
     };
 }

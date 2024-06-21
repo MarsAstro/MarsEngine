@@ -24,78 +24,67 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials) : pos
         std::cout << "ERROR::ASSET::OBJ_FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
 
-    unsigned int vertexCount = 0;
-    unsigned int normalCount = 0;
-    unsigned int texCoordCount = 0;
+    std::vector<glm::vec3> vertexPositions;
+    std::vector<glm::vec3> vertexNormals;
+    std::vector<glm::vec2> textureCoordinates;
+    std::vector<Face> faces;
+    std::string currentLine;
+    std::string currentMaterialName;
 
     while (object.is_open() && !object.eof())
     {
-        std::vector<glm::vec3> vertexPositions;
-        std::vector<glm::vec3> vertexNormals;
-        std::vector<glm::vec2> textureCoordinates;
-        std::vector<Face> faces;
-        std::string currentLine;
-        std::string currentMaterialName;
+        std::getline(object, currentLine);
+        if (currentLine.empty() || currentLine[0] == '#')
+            continue;
 
-        while (object.is_open() && !object.eof())
-        {
-            std::getline(object, currentLine);
-            if (currentLine.empty() || currentLine[0] == '#')
-                continue;
+        std::stringstream lineStream (currentLine);
+        std::string lineWord;
+        lineStream >> lineWord;
 
-            std::stringstream lineStream (currentLine);
-            std::string lineWord;
-            lineStream >> lineWord;
-
-            if (lineWord == "mtllib")
-                materials->append_range(ReadMaterialFile(lineStream, path));
-            else if (lineWord == "v")
-                vertexPositions.push_back(ReadVec3FromLine(lineStream));
-            else if (lineWord == "vn")
-                vertexNormals.push_back(ReadVec3FromLine(lineStream));
-            else if (lineWord == "vt")
-                textureCoordinates.push_back(ReadVec2FromLine(lineStream));
-            else if (lineWord == "usemtl")
-                lineStream >> currentMaterialName;
-            else if (lineWord == "f")
-                faces.push_back(ReadFaceFromLine(lineStream, currentMaterialName));
-        }
-
-        std::vector<Vertex> vertices;
-        std::vector<unsigned int> indices;
-
-        for (const Face& face : faces)
-        {
-            unsigned int baseIndex = vertices.size();
-
-            for (int i = 0; i < face.vertexIndices.size(); ++i)
-            {
-                unsigned int vertexPosIndex = face.vertexIndices[i] - vertexCount - 1;
-                unsigned int vertexNormIndex = face.normalIndices[i] - normalCount - 1;
-                unsigned int texCoordIndex = face.textureCoordinateIndices[i] - texCoordCount - 1;
-
-                vertices.push_back({
-                    vertexPositions[vertexPosIndex],
-                    vertexNormals[vertexNormIndex],
-                    textureCoordinates[texCoordIndex],
-                    GetMaterialIndex(face.materialName, *materials)
-                });
-            }
-
-            for (int i = 1; i < face.vertexIndices.size() - 1; ++i)
-            {
-                indices.push_back(baseIndex);
-                indices.push_back(baseIndex + i);
-                indices.push_back(baseIndex + i + 1);
-            }
-        }
-
-        vertexCount += vertexPositions.size();
-        normalCount += vertexNormals.size();
-        texCoordCount += textureCoordinates.size();
-
-        mMeshes.emplace_back(vertices, indices);
+        if (lineWord == "mtllib")
+            materials->append_range(ReadMaterialFile(lineStream, path));
+        else if (lineWord == "v")
+            vertexPositions.push_back(ReadVec3FromLine(lineStream));
+        else if (lineWord == "vn")
+            vertexNormals.push_back(ReadVec3FromLine(lineStream));
+        else if (lineWord == "vt")
+            textureCoordinates.push_back(ReadVec2FromLine(lineStream));
+        else if (lineWord == "usemtl")
+            lineStream >> currentMaterialName;
+        else if (lineWord == "f")
+            faces.push_back(ReadFaceFromLine(lineStream, currentMaterialName));
     }
+
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    for (const Face& face : faces)
+    {
+        unsigned int baseIndex = vertices.size();
+
+        for (int i = 0; i < face.vertexIndices.size(); ++i)
+        {
+            unsigned int vertexPosIndex = face.vertexIndices[i] - 1;
+            unsigned int vertexNormIndex = face.normalIndices[i] - 1;
+            unsigned int texCoordIndex = face.textureCoordinateIndices[i] - 1;
+
+            vertices.push_back({
+                vertexPositions[vertexPosIndex],
+                vertexNormals[vertexNormIndex],
+                textureCoordinates[texCoordIndex],
+                GetMaterialIndex(face.materialName, *materials)
+            });
+        }
+
+        for (int i = 1; i < face.vertexIndices.size() - 1; ++i)
+        {
+            indices.push_back(baseIndex);
+            indices.push_back(baseIndex + i);
+            indices.push_back(baseIndex + i + 1);
+        }
+    }
+
+    mMesh.SetupMesh(vertices, indices);
 }
 
 void Geometry::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
@@ -104,14 +93,51 @@ void Geometry::Model::Draw(const Shading::ShaderProgram* shaderProgram) const
     model = glm::scale(model, scale);
     shaderProgram->SetMat4("model", model);
 
-    for (const Mesh& mesh : mMeshes)
-        mesh.Draw();
+    glBindVertexArray(mMesh.VAO);
+    glDrawElements(GL_TRIANGLES, mMesh.indices.size(), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(0);
 }
 
-void Geometry::Model::DrawInstanced(const int amount) const
+void Geometry::Model::SetupInstancing(const int amount, const glm::mat4* modelMatrices)
 {
-    for (const Mesh& mesh : mMeshes)
-        mesh.DrawInstanced(amount);
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+
+    glBindVertexArray(mMesh.VAO);
+    std::size_t vec4Size = sizeof(glm::vec4);
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, nullptr);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(1 * vec4Size));
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(2 * vec4Size));
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(3 * vec4Size));
+
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+    glVertexAttribDivisor(7, 1);
+
+    glBindVertexArray(0);
+
+    mIsInstancingEnabled = true;
+    mInstanceAmount = amount;
+}
+
+void Geometry::Model::DrawInstanced() const
+{
+    if (!mIsInstancingEnabled)
+    {
+        std::cout << "ERROR::MODEL::INSTANCING_NOT_ENABLED" << std::endl;
+        return;
+    }
+
+    glBindVertexArray(mMesh.VAO);
+    glDrawElementsInstanced(GL_TRIANGLES, mMesh.indices.size(), GL_UNSIGNED_INT, nullptr, mInstanceAmount);
+    glBindVertexArray(0);
 }
 
 std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstream &objLineStream,

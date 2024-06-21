@@ -76,7 +76,7 @@ int main()
 
     ResourceManager shaderManager = ResourceManager();
 
-    MainFunctions::Playground(window, shaderManager);
+    MainFunctions::SpaceScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -159,28 +159,7 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &resourceMana
         modelMatrices[i] = model;
     }
 
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
-
-    glBindVertexArray(asteroid.mMeshes[0].VAO);
-    std::size_t vec4Size = sizeof(glm::vec4);
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, nullptr);
-    glEnableVertexAttribArray(5);
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(1 * vec4Size));
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(2 * vec4Size));
-    glEnableVertexAttribArray(7);
-    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(3 * vec4Size));
-
-    glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);
-    glVertexAttribDivisor(6, 1);
-    glVertexAttribDivisor(7, 1);
-
-    glBindVertexArray(0);
+    asteroid.SetupInstancing(amount, modelMatrices);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -204,7 +183,7 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &resourceMana
         planet.Draw(unlitShader);
 
         instancedUnlitShader->Use();
-        asteroid.DrawInstanced(amount);
+        asteroid.DrawInstanced();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
