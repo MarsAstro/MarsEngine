@@ -197,7 +197,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
 {
     ShaderProgram* objectShader         = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
-        "shaders/lighting/blinn-phong/point_lights.frag",
+        "shaders/lighting/point_lights.frag",
         { Matrices, PointLights });
     ShaderProgram* windowShader         = resourceManager.CreateShaderProgram(
         "shaders/general/default.vert",
@@ -255,7 +255,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         "assets/textures/yokohama/front.jpg",
         "assets/textures/yokohama/back.jpg"
     };
-    skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_RGB, GL_RGB);
+    skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
 
     std::vector<glm::vec3> windowObjects;
     windowObjects.emplace_back(0.0f, -1.0f, -5.0f);

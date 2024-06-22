@@ -79,7 +79,7 @@ unsigned int Assets::LoadTexture(const char* texturePath, GLenum internalFormat,
     return texture;
 }
 
-unsigned int Assets::LoadCubemap(std::vector<std::string> faces, GLenum internalFormat, GLenum outputFormat)
+unsigned int Assets::LoadCubemap(std::vector<std::string> faces, GLenum internalFormat, GLenum format)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -94,7 +94,7 @@ unsigned int Assets::LoadCubemap(std::vector<std::string> faces, GLenum internal
             glTexImage2D
                     (
                             GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                            0, internalFormat, width, height, 0, outputFormat, GL_UNSIGNED_BYTE, data
+                            0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data
                     );
 
             stbi_image_free(data);

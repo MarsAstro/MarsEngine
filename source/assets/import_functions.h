@@ -8,5 +8,5 @@ namespace Assets
 {
     unsigned int LoadTexture(const std::string &path, const bool &isSRGB);
     unsigned int LoadTexture(const char* texturePath, GLenum internalFormat, GLenum outputFormat, GLenum wrapFormat);
-    unsigned int LoadCubemap(std::vector<std::string> faces, GLenum internalFormat, GLenum outputFormat);
+    unsigned int LoadCubemap(std::vector<std::string> faces, GLenum internalFormat, GLenum format);
 }
