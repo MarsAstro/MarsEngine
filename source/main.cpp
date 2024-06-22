@@ -224,13 +224,13 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         "shaders/post_processing/default_screen_space.frag");
 
     resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
-                                             glm::vec3(0.02f), glm::vec3(0.5f), glm::vec3(1.0f),
+                                             glm::vec3(0.03f), glm::vec3(0.5f), glm::vec3(1.0f),
                                              1.0f, 0.09f, 0.032f);
     resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
-                                             glm::vec3(0.02f), glm::vec3(0.5f), glm::vec3(1.0f),
+                                             glm::vec3(0.03f), glm::vec3(0.5f), glm::vec3(1.0f),
                                              1.0f, 0.09f, 0.032f);
     resourceManager.lightManager.AddPointLight(glm::vec3(-15.0f, -1.0f, -15.0f),
-                                             glm::vec3(0.02f), glm::vec3(0.5f),glm::vec3(1.0f),
+                                             glm::vec3(0.03f), glm::vec3(0.5f),glm::vec3(1.0f),
                                              1.0f, 0.09f, 0.032f);
 
     SetupFramebuffer();
@@ -282,6 +282,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -404,7 +405,6 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         * SCREEN SPACE DRAW PASS
         *
         */
-        glEnable(GL_FRAMEBUFFER_SRGB);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
 
@@ -425,7 +425,6 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, nullptr);
 
         glEnable(GL_CULL_FACE);
-        glDisable(GL_FRAMEBUFFER_SRGB);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -584,7 +583,7 @@ void MainFunctions::SetupFramebuffer()
 
     glGenTextures(1, &textureColorbuffer);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -612,7 +611,7 @@ void MainFunctions::SetupFramebuffer()
 
     glGenTextures(1, &msaaTextureColorbuffer);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaTextureColorbuffer);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA, GL_RGB, screenWidth, screenHeight, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA, GL_SRGB, screenWidth, screenHeight, GL_TRUE);
     glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
