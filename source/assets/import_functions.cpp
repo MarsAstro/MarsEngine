@@ -12,26 +12,26 @@ unsigned int Assets::LoadTexture(const std::string &path, const bool &isSRGB)
     int width, height, nrComponents;
     if (unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0))
     {
-        GLenum inputFormat = GLenum();
-        GLenum outputFormat = GLenum();
+        GLenum internalFormat = GLenum();
+        GLenum format = GLenum();
         if (nrComponents == 1)
         {
-            inputFormat = GL_RED;
-            outputFormat = inputFormat;
+            internalFormat = GL_RED;
+            format = internalFormat;
         }
         else if (nrComponents == 3)
         {
-            inputFormat = isSRGB ? GL_SRGB : GL_RGB;
-            outputFormat = GL_RGB;
+            internalFormat = isSRGB ? GL_SRGB : GL_RGB;
+            format = GL_RGB;
         }
         else if (nrComponents == 4)
         {
-            inputFormat = isSRGB ? GL_SRGB_ALPHA : GL_RGBA;
-            outputFormat = GL_RGBA;
+            internalFormat = isSRGB ? GL_SRGB_ALPHA : GL_RGBA;
+            format = GL_RGBA;
         }
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, inputFormat, width, height, 0, outputFormat, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
