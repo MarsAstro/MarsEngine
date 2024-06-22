@@ -421,7 +421,9 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         glBindVertexArray(screenVAO);
         screenSpaceShader->Use();
 
+        glEnable(GL_FRAMEBUFFER_SRGB);
         glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, nullptr);
+        glDisable(GL_FRAMEBUFFER_SRGB);
 
         glEnable(GL_CULL_FACE);
 
