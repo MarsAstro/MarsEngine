@@ -224,14 +224,14 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         "shaders/post_processing/default_screen_space.frag");
 
     resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
-                                             glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
-                                             1.0f, 0.045f, 0.0075f);
+                                             glm::vec3(0.02f), glm::vec3(0.5f), glm::vec3(1.0f),
+                                             1.0f, 0.09f, 0.032f);
     resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
-                                             glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
-                                             1.0f, 0.045f, 0.0075f);
+                                             glm::vec3(0.02f), glm::vec3(0.5f), glm::vec3(1.0f),
+                                             1.0f, 0.09f, 0.032f);
     resourceManager.lightManager.AddPointLight(glm::vec3(-15.0f, -1.0f, -15.0f),
-                                             glm::vec3(0.05f), glm::vec3(0.5f),glm::vec3(1.0f),
-                                             1.0f, 0.045f, 0.0075f);
+                                             glm::vec3(0.02f), glm::vec3(0.5f),glm::vec3(1.0f),
+                                             1.0f, 0.09f, 0.032f);
 
     SetupFramebuffer();
     unsigned int drawBuffer = MSAA > 0 ? msaaFramebuffer : framebuffer;
@@ -404,6 +404,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         * SCREEN SPACE DRAW PASS
         *
         */
+        glEnable(GL_FRAMEBUFFER_SRGB);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
 
@@ -421,11 +422,10 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         glBindVertexArray(screenVAO);
         screenSpaceShader->Use();
 
-        glEnable(GL_FRAMEBUFFER_SRGB);
         glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, nullptr);
-        glDisable(GL_FRAMEBUFFER_SRGB);
 
         glEnable(GL_CULL_FACE);
+        glDisable(GL_FRAMEBUFFER_SRGB);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
