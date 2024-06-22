@@ -4,7 +4,7 @@
 
 #include "stb_image.h"
 
-unsigned int Assets::LoadTexture(const std::string &path)
+unsigned int Assets::LoadTexture(const std::string &path, const bool &isSRGB)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -12,16 +12,26 @@ unsigned int Assets::LoadTexture(const std::string &path)
     int width, height, nrComponents;
     if (unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0))
     {
-        GLenum format = GLenum();
+        GLenum inputFormat = GLenum();
+        GLenum outputFormat = GLenum();
         if (nrComponents == 1)
-            format = GL_RED;
+        {
+            inputFormat = GL_RED;
+            outputFormat = inputFormat;
+        }
         else if (nrComponents == 3)
-            format = GL_RGB;
+        {
+            inputFormat = isSRGB ? GL_SRGB : GL_RGB;
+            outputFormat = GL_RGB;
+        }
         else if (nrComponents == 4)
-            format = GL_RGBA;
+        {
+            inputFormat = isSRGB ? GL_SRGB_ALPHA : GL_RGBA;
+            outputFormat = GL_RGBA;
+        }
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, inputFormat, width, height, 0, outputFormat, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -18,8 +18,7 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials) : pos
     try
     {
         object.open(path);
-    }
-    catch (std::ifstream::failure& exception)
+    } catch (std::ifstream::failure &exception)
     {
         std::cout << "ERROR::ASSET::OBJ_FILE_NOT_SUCCESSFULLY_READ" << std::endl;
     }
@@ -37,7 +36,7 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials) : pos
         if (currentLine.empty() || currentLine[0] == '#')
             continue;
 
-        std::stringstream lineStream (currentLine);
+        std::stringstream lineStream(currentLine);
         std::string lineWord;
         lineStream >> lineWord;
 
@@ -58,7 +57,7 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials) : pos
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    for (const Face& face : faces)
+    for (const Face &face: faces)
     {
         unsigned int baseIndex = vertices.size();
 
@@ -194,12 +193,12 @@ std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstr
             materials[currentMaterial].emissiveColor = ReadVec3FromLine(lineStream);
         else if (lineWord == "map_Kd")
         {
-            materials[currentMaterial].diffuseMap = ReadTextureFromLine(lineStream, objPath);
+            materials[currentMaterial].diffuseMap = ReadTextureFromLine(lineStream, objPath, true);
             materials[currentMaterial].hasDiffuseMap = true;
         }
         else if (lineWord == "map_Ks")
         {
-            materials[currentMaterial].specularMap = ReadTextureFromLine(lineStream, objPath);
+            materials[currentMaterial].specularMap = ReadTextureFromLine(lineStream, objPath, false);
             materials[currentMaterial].hasSpecularMap = true;
         }
     }
@@ -207,7 +206,7 @@ std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstr
     return materials;
 }
 
-unsigned int Geometry::Model::ReadTextureFromLine(std::stringstream &mtlLineStream, const char *objPath)
+unsigned int Geometry::Model::ReadTextureFromLine(std::stringstream &mtlLineStream, const char *objPath, const bool &isDiffuse)
 {
     std::string fileName;
     std::string path = objPath;
@@ -216,7 +215,7 @@ unsigned int Geometry::Model::ReadTextureFromLine(std::stringstream &mtlLineStre
     mtlLineStream >> fileName;
     path += fileName;
 
-    return Assets::LoadTexture(path);
+    return Assets::LoadTexture(path, isDiffuse);
 }
 
 Geometry::Face Geometry::Model::ReadFaceFromLine(std::stringstream &lineStream, std::string materialName)

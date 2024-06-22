@@ -161,6 +161,7 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &resourceMana
 
     asteroid.SetupInstancing(amount, modelMatrices);
 
+    glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
@@ -237,7 +238,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
     Geometry::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
-    windowTexture = Assets::LoadTexture("assets/textures/window.png", GL_RGBA, GL_RGBA, GL_CLAMP_TO_EDGE);
+    windowTexture = Assets::LoadTexture("assets/textures/window.png", GL_SRGB_ALPHA, GL_RGBA, GL_CLAMP_TO_EDGE);
 
     unsigned int screenVAO, screenVBO, screenEBO, screenIndicesCount;
     Geometry::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
@@ -492,6 +493,7 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &resourceMan
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
                                              1.0f, 0.014f, 0.0007f);
 
+    glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
