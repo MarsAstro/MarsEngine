@@ -10,7 +10,8 @@
 
 #include "../assets/import_functions.h"
 
-Geometry::Model::Model(const char *path, std::vector<Material>* materials) : position(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f)
+Geometry::Model::Model(const char *path, std::vector<Material>* materials, unsigned int modelIndex)
+    : position(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f), mInstanceAmount(0), mModelIndex(modelIndex)
 {
     std::ifstream object;
     object.exceptions(std::ifstream::badbit);
@@ -139,8 +140,7 @@ void Geometry::Model::DrawInstanced() const
     glBindVertexArray(0);
 }
 
-std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstream &objLineStream,
-                                                                  const char *objPath)
+std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstream &objLineStream, const char *objPath) const
 {
     std::string fileName;
     std::string path = objPath;
@@ -178,7 +178,7 @@ std::vector<Geometry::Material> Geometry::Model::ReadMaterialFile(std::stringstr
         if (lineWord == "newmtl")
         {
             lineStream >> lineWord;
-            materials.push_back({ lineWord });
+            materials.push_back({ lineWord, mModelIndex });
             ++currentMaterial;
         }
         else if (lineWord == "Ns")
@@ -281,13 +281,13 @@ glm::vec3 Geometry::Model::ReadVec3FromLine(std::stringstream& lineStream)
     return newVector;
 }
 
-int Geometry::Model::GetMaterialIndex(const std::string& name, const std::vector<Material> &materials)
+int Geometry::Model::GetMaterialIndex(const std::string& name, const std::vector<Material> &materials) const
 {
     int result = -1;
 
     for (int i = 0; i < materials.size(); ++i)
     {
-        if (materials[i].name == name)
+        if (materials[i].name == name && materials[i].modelIndex == mModelIndex)
         {
             result = i;
             break;

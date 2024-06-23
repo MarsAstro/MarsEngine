@@ -472,7 +472,7 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         "assets/textures/ocean_mountains/back.jpg"
     };
     skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
-    Model model = resourceManager.LoadModel("assets/models/backpack/backpack.obj");
+    Model model = resourceManager.LoadModel("assets/models/rock/rock.obj");
     Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
 
     int textureCount = resourceManager.GetTextureCount();

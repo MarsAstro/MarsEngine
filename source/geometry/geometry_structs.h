@@ -25,6 +25,7 @@ namespace Geometry
     struct Material
     {
         std::string name;
+        unsigned int modelIndex;
 
         glm::vec3 ambientColor;
 

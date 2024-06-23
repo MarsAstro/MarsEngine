@@ -5,7 +5,7 @@
 
 using Shading::ShaderProgram;
 
-ResourceManager::ResourceManager() : lightManager(MAX_POINT_LIGHTS)
+ResourceManager::ResourceManager() : lightManager(MAX_POINT_LIGHTS), mModelIndex(0)
 {
     /*
      * Create Matrices buffer
@@ -84,7 +84,7 @@ ShaderProgram * ResourceManager::CreateShaderProgram(const char *vertexPath, con
 
 Geometry::Model ResourceManager::LoadModel(const char *modelPath)
 {
-    Geometry::Model newModel = Geometry::Model(modelPath, &mMaterials);
+    Geometry::Model newModel = Geometry::Model(modelPath, &mMaterials, mModelIndex++);
 
     return newModel;
 }

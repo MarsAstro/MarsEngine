@@ -38,6 +38,7 @@ private:
     std::vector<std::unique_ptr<Shading::ShaderProgram>> mShaderProgramList;
     std::vector<Geometry::Material> mMaterials;
 
+    unsigned int mModelIndex;
     unsigned int mUBOMatrices;
     unsigned int mUBOPointLights;
 
