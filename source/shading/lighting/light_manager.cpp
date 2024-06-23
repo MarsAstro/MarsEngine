@@ -7,21 +7,32 @@
 
 using Shading::Lighting::LightManager;
 
-LightManager::LightManager(unsigned int maxPointLights)
+LightManager::LightManager(unsigned int maxPointLights): directionalLight()
 {
     pointLights.resize(maxPointLights);
     Geometry::CreateCube(0.025f, mVAO, mVBO);
 }
 
+void LightManager::SetDirectionalLight(glm::vec3 direction, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular)
+{
+    directionalLight = DirectionalLight
+    {
+        glm::vec4(direction, 0.0f),
+        glm::vec4(ambient, 1.0f),
+        glm::vec4(diffuse, 1.0f),
+        glm::vec4(specular, 1.0f)
+    };
+}
+
 void LightManager::AddPointLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular,
-    float constant, float linear, float quadratic)
+                                 float constant, float linear, float quadratic)
 {
     if (mNumPointLights + 1 >= pointLights.size())
         return;
 
     PointLight newPointLight
     {
-        glm::vec4(position, 1.0f),
+        glm::vec4(position, 0.0f),
         glm::vec4(ambient, 1.0f),
         glm::vec4(diffuse, 1.0f),
         glm::vec4(specular, 1.0f),
@@ -82,4 +93,12 @@ std::vector<Shading::Lighting::PointLight> LightManager::GetViewSpacePointLights
     }
 
     return viewSpacePointLights;
+}
+
+Shading::Lighting::DirectionalLight LightManager::GetViewSpaceDirectionalLight(const glm::mat4& viewMatrix) const
+{
+    DirectionalLight viewSpaceDirLight = directionalLight;
+    viewSpaceDirLight.direction = viewMatrix * viewSpaceDirLight.direction;
+
+    return viewSpaceDirLight;
 }

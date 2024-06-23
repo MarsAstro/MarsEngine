@@ -26,8 +26,9 @@ public:
 
     void SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const;
     void SetViewMatrix(glm::mat4 view) const;
-    void SetMaterials(const Shading::ShaderProgram* shader) const;
-    void UpdateLightsBuffer(const glm::mat4& viewMatrix) const;
+    void ApplyMaterials(const Shading::ShaderProgram* shader) const;
+    void UpdateDirectionalLight(const Shading::ShaderProgram* shader, const glm::mat4& viewMatrix) const;
+    void UpdatePointLightsBuffer(const glm::mat4& viewMatrix) const;
 
     int GetTextureCount() const;
 
@@ -42,8 +43,6 @@ private:
 
     static constexpr unsigned int MATRICES_COUNT = 2;
     static constexpr unsigned int MAX_POINT_LIGHTS = 64;
-    static constexpr unsigned int SIZEOF_POINT_LIGHT = 20 * sizeof(float);
-    static constexpr unsigned int POINT_LIGHTS_ARRAY_SIZE = MAX_POINT_LIGHTS * SIZEOF_POINT_LIGHT;
 
 public:
     Shading::Lighting::LightManager lightManager;

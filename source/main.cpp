@@ -30,6 +30,7 @@ namespace MainFunctions
     void EmptyScene(GLFWwindow *window, ResourceManager& resourceManager);
     void SpaceScene(GLFWwindow *window, ResourceManager& resourceManager);
     void Playground(GLFWwindow *window, ResourceManager& resourceManager);
+    void ShadowsScene(GLFWwindow *window, ResourceManager& resourceManager);
     void GeometryHousesScene(GLFWwindow *window, ResourceManager& resourceManager);
     void ModelViewer(GLFWwindow *window, ResourceManager& resourceManager);
 
@@ -76,7 +77,7 @@ int main()
 
     ResourceManager shaderManager = ResourceManager();
 
-    MainFunctions::Playground(window, shaderManager);
+    MainFunctions::ShadowsScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -120,8 +121,8 @@ void MainFunctions::SpaceScene(GLFWwindow *window, ResourceManager &resourceMana
 
     Model planet = resourceManager.LoadModel("assets/models/planet/planet.obj");
     Model asteroid = resourceManager.LoadModel("assets/models/rock/rock.obj");
-    resourceManager.SetMaterials(unlitShader);
-    resourceManager.SetMaterials(instancedUnlitShader);
+    resourceManager.ApplyMaterials(unlitShader);
+    resourceManager.ApplyMaterials(instancedUnlitShader);
 
     camera.Position = glm::vec3(0.0f, 0.0f, 40.0f);
     planet.scale = glm::vec3(4.0f, 4.0f, 4.0f);
@@ -275,7 +276,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
     glActiveTexture(GL_TEXTURE0 + textureCount++);
     glBindTexture(GL_TEXTURE_2D, windowTexture);
 
-    resourceManager.SetMaterials(objectShader);
+    resourceManager.ApplyMaterials(objectShader);
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     glEnable(GL_STENCIL_TEST);
@@ -318,7 +319,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
 
         resourceManager.lightManager.MovePointLight(0, glm::vec3(cos(currentTime / 3.25f) * 3.0f, 0, sin(currentTime / 3.25f) * 3.0f));
         resourceManager.lightManager.MovePointLight(1, glm::vec3(cos(currentTime / 1.5f) * 3.0f, sin(currentTime / 1.5f) * 3.0f, 0));
-        resourceManager.UpdateLightsBuffer(view);
+        resourceManager.UpdatePointLightsBuffer(view);
 
         /*
          * Draw solid objects
@@ -433,6 +434,153 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
     CleanupFramebuffer();
 }
 
+void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceManager)
+{
+    ShaderProgram* objectShader         = resourceManager.CreateShaderProgram(
+        "shaders/general/default.vert",
+        "shaders/lighting/directional_light.frag",
+        { Matrices });
+    ShaderProgram* skyboxShader         = resourceManager.CreateShaderProgram(
+        "shaders/general/skybox.vert",
+        "shaders/general/skybox.frag",
+        { Matrices });
+    ShaderProgram* screenSpaceShader    = resourceManager.CreateShaderProgram(
+        "shaders/post_processing/default_screen_space.vert",
+        "shaders/post_processing/default_screen_space.frag");
+
+    resourceManager.lightManager.SetDirectionalLight(
+        glm::vec3(-0.2f, -1.0f, -0.3f),
+        glm::vec3(0.01f), glm::vec3(0.8f), glm::vec3(1.0f)
+    );
+
+    SetupFramebuffer();
+    unsigned int drawBuffer = MSAA > 0 ? msaaFramebuffer : framebuffer;
+
+    unsigned int screenVAO, screenVBO, screenEBO, screenIndicesCount;
+    Geometry::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
+
+    unsigned int skyboxVAO, skyboxTexture;
+    Geometry::CreateSkyboxCube(skyboxVAO);
+
+    std::vector<std::string> skyboxFaces
+    {
+        "assets/textures/ocean_mountains/right.jpg",
+        "assets/textures/ocean_mountains/left.jpg",
+        "assets/textures/ocean_mountains/top.jpg",
+        "assets/textures/ocean_mountains/bottom.jpg",
+        "assets/textures/ocean_mountains/front.jpg",
+        "assets/textures/ocean_mountains/back.jpg"
+    };
+    skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
+    Model model = resourceManager.LoadModel("assets/models/backpack/backpack.obj");
+    Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
+
+    int textureCount = resourceManager.GetTextureCount();
+    screenSpaceShader->Use();
+    screenSpaceShader->SetInt("screenTexture", textureCount);
+    glActiveTexture(GL_TEXTURE0 + textureCount++);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+
+    resourceManager.ApplyMaterials(objectShader);
+    floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
+
+    glEnable(GL_STENCIL_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        /*
+        *
+        * MAIN DRAW PASS
+        * MAIN DRAW PASS
+        * MAIN DRAW PASS
+        *
+        */
+        glBindFramebuffer(GL_FRAMEBUFFER, drawBuffer);
+        glEnable(GL_DEPTH_TEST);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        glStencilMask(0x00);
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+
+        /*
+         * Common shader setup
+         */
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+        resourceManager.SetMatrices(view, projection);
+        resourceManager.UpdateDirectionalLight(objectShader, view);
+
+        /*
+         * Draw solid objects
+         */
+        objectShader->Use();
+
+        model.Draw(objectShader);
+        floor.Draw(objectShader);
+
+        /*
+        * Draw skybox
+        */
+        glDepthFunc(GL_LEQUAL);
+
+        skyboxShader->Use();
+
+        resourceManager.SetViewMatrix(glm::mat4(glm::mat3(view)));
+        glBindVertexArray(skyboxVAO);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        resourceManager.SetViewMatrix(view);
+
+        glDepthFunc(GL_LESS);
+
+        /*
+        *
+        * SCREEN SPACE DRAW PASS
+        * SCREEN SPACE DRAW PASS
+        * SCREEN SPACE DRAW PASS
+        *
+        */
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+
+        if constexpr (MSAA > 0)
+        {
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFramebuffer);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+            glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindVertexArray(screenVAO);
+        screenSpaceShader->Use();
+
+        glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, nullptr);
+
+        glEnable(GL_CULL_FACE);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    CleanupFramebuffer();
+}
+
 void MainFunctions::GeometryHousesScene(GLFWwindow* window, ResourceManager& resourceManager)
 {
     ShaderProgram* pointsShader    = resourceManager.CreateShaderProgram(
@@ -488,7 +636,7 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &resourceMan
     stbi_set_flip_vertically_on_load(true);
     Model loadedModel = resourceManager.LoadModel("assets/models/shanalotte/Shanalotte.obj");
     loadedModel.scale = glm::vec3(0.2f);
-    resourceManager.SetMaterials(objectShader);
+    resourceManager.ApplyMaterials(objectShader);
 
     resourceManager.lightManager.AddPointLight(glm::vec3(0.0f),
                                              glm::vec3(0.05f), glm::vec3(0.5f), glm::vec3(1.0f),
@@ -513,7 +661,7 @@ void MainFunctions::ModelViewer(GLFWwindow *window, ResourceManager &resourceMan
         resourceManager.SetMatrices(view, projection);
 
         resourceManager.lightManager.MovePointLight(0, camera.Position);
-        resourceManager.UpdateLightsBuffer(view);
+        resourceManager.UpdatePointLightsBuffer(view);
 
         /*
          * Draw shapes

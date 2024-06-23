@@ -20,11 +20,11 @@ ResourceManager::ResourceManager() : lightManager(MAX_POINT_LIGHTS)
     glBindBufferBase(GL_UNIFORM_BUFFER, Matrices, mUBOMatrices);
 
     /*
-     * Create Lights buffer
+     * Create PointLights buffer
      */
     glGenBuffers(1, &mUBOPointLights);
 
-    unsigned int pointlightsSize = POINT_LIGHTS_ARRAY_SIZE + sizeof(int);
+    unsigned int pointlightsSize = MAX_POINT_LIGHTS * sizeof(Shading::Lighting::PointLight) + sizeof(int);
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOPointLights);
     glBufferData(GL_UNIFORM_BUFFER, pointlightsSize, nullptr, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -89,17 +89,17 @@ Geometry::Model ResourceManager::LoadModel(const char *modelPath)
     return newModel;
 }
 
-const char* ResourceManager::GetUniformBlockLayoutName(ShaderUniformBlock uniformBlock)
+const char* ResourceManager::GetUniformBlockLayoutName(const ShaderUniformBlock uniformBlock)
 {
     switch (uniformBlock)
     {
-        case Matrices:      return "Matrices";
-        case PointLights:   return "PointLights";
-        default:            return "";
+        case Matrices:          return "Matrices";
+        case PointLights:       return "PointLights";
+        default:                return "";
     }
 }
 
-void ResourceManager::SetMatrices(const glm::mat4 &view, const glm::mat4 &projection) const
+void ResourceManager::SetMatrices(const glm::mat4& view, const glm::mat4& projection) const
 {
     glm::mat4 matrices[] = { view, projection };
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOMatrices);
@@ -114,7 +114,7 @@ void ResourceManager::SetViewMatrix(glm::mat4 view) const
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void ResourceManager::SetMaterials(const ShaderProgram* shader) const
+void ResourceManager::ApplyMaterials(const ShaderProgram* shader) const
 {
     shader->Use();
 
@@ -142,18 +142,31 @@ void ResourceManager::SetMaterials(const ShaderProgram* shader) const
     }
 }
 
+void ResourceManager::UpdateDirectionalLight(const Shading::ShaderProgram *shader, const glm::mat4& viewMatrix) const
+{
+    shader->Use();
+
+    Shading::Lighting::DirectionalLight dirLight = lightManager.GetViewSpaceDirectionalLight(viewMatrix);
+    std::string prefix = "directionalLight.";
+    shader->SetVec4(prefix + "direction",   dirLight.direction);
+    shader->SetVec4(prefix + "ambient",     dirLight.ambient);
+    shader->SetVec4(prefix + "diffuse",     dirLight.diffuse);
+    shader->SetVec4(prefix + "specular",    dirLight.specular);
+}
+
 int ResourceManager::GetTextureCount() const
 {
     return mMaterials.size() * 2;
 }
 
-void ResourceManager::UpdateLightsBuffer(const glm::mat4 &viewMatrix) const
+void ResourceManager::UpdatePointLightsBuffer(const glm::mat4 &viewMatrix) const
 {
     std::vector<Shading::Lighting::PointLight> pointLights = lightManager.GetViewSpacePointLights(viewMatrix);
     int numPointlights = lightManager.GetNumberOfPointLights();
 
+    unsigned int pointLightsArraySize = MAX_POINT_LIGHTS * sizeof(Shading::Lighting::PointLight);
     glBindBuffer(GL_UNIFORM_BUFFER, mUBOPointLights);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, POINT_LIGHTS_ARRAY_SIZE, &pointLights[0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, POINT_LIGHTS_ARRAY_SIZE, sizeof(int), static_cast<void*>(&numPointlights));
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, pointLightsArraySize, &pointLights[0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, pointLightsArraySize, sizeof(int), static_cast<void*>(&numPointlights));
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
