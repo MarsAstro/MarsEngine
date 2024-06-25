@@ -102,3 +102,8 @@ Shading::Lighting::DirectionalLight LightManager::GetViewSpaceDirectionalLight(c
 
     return viewSpaceDirLight;
 }
+
+glm::vec3 LightManager::GetDirectionalLightDirection() const
+{
+    return directionalLight.direction;
+}

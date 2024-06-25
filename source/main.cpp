@@ -450,9 +450,8 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
             "shaders/lighting/light_space.vert",
             "shaders/lighting/light_space.frag");
 
-    glm::vec3 lightDir = glm::vec3(0.33f, -1.0f, 0.3f);
     resourceManager.lightManager.SetDirectionalLight(
-        lightDir, glm::vec3(0.2f), glm::vec3(1.0f), glm::vec3(1.0f)
+        glm::vec3(0.33f, -1.0f, 0.3f), glm::vec3(0.2f), glm::vec3(1.0f), glm::vec3(1.0f)
     );
 
     unsigned int skyboxVAO, skyboxTexture;
@@ -525,7 +524,9 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
 
         float nearPlane = 1.0f;
         float farPlane = 20.0f;
-        view        = lookAt(lightDir * -10.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec3 dirLightPos = resourceManager.lightManager.GetDirectionalLightDirection() * -10.0f;
+
+        view        = lookAt(dirLightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
 
         glm::mat4 lightSpaceMatrix = projection * view;
@@ -533,6 +534,11 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         lightDepthShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
         glCullFace(GL_FRONT);
+        model.position = glm::vec3(0.0f);
+        model.Draw(lightDepthShader);
+        model.position = glm::vec3(0.0f, 3.0f, -2.0f);
+        model.Draw(lightDepthShader);
+        model.position = glm::vec3(4.0f, 0.0f, 3.0f);
         model.Draw(lightDepthShader);
         floor.Draw(lightDepthShader);
         glCullFace(GL_BACK);
@@ -563,6 +569,11 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         objectShader->Use();
         objectShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
+        model.position = glm::vec3(0.0f);
+        model.Draw(objectShader);
+        model.position = glm::vec3(0.0f, 3.0f, -2.0f);
+        model.Draw(objectShader);
+        model.position = glm::vec3(4.0f, 0.0f, 3.0f);
         model.Draw(objectShader);
         floor.Draw(objectShader);
 

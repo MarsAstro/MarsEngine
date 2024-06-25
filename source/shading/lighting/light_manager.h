@@ -22,6 +22,7 @@ namespace Shading::Lighting
         unsigned int GetNumberOfPointLights() const;
         std::vector<PointLight> GetViewSpacePointLights(const glm::mat4& viewMatrix) const;
         DirectionalLight GetViewSpaceDirectionalLight(const glm::mat4& viewMatrix) const;
+        glm::vec3 GetDirectionalLightDirection() const;
 
     private:
         std::vector<PointLight> pointLights;
