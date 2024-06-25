@@ -20,6 +20,8 @@ using Geometry::Model;
 
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 900;
+constexpr int SHADOW_WIDTH = 1024;
+constexpr int SHADOW_HEIGHT = 1024;
 constexpr int MSAA = 16;
 int screenWidth = SCREEN_WIDTH;
 int screenHeight = SCREEN_HEIGHT;
@@ -86,17 +88,17 @@ int main()
 void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &resourceManager)
 {
     glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
         previousTime = currentTime;
 
         ProcessInput(window);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
@@ -444,6 +446,9 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         "shaders/general/skybox.vert",
         "shaders/general/skybox.frag",
         { Matrices });
+    ShaderProgram* lightDepthShader     = resourceManager.CreateShaderProgram(
+            "shaders/lighting/light_space.vert",
+            "shaders/lighting/light_space.frag");
 
     resourceManager.lightManager.SetDirectionalLight(
         glm::vec3(-0.2f, -1.0f, -0.3f),
@@ -469,22 +474,30 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     resourceManager.ApplyMaterials(objectShader);
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
-    glEnable(GL_STENCIL_TEST);
+    unsigned int depthMapFBO, depthMapTexture;
+
+    glGenTextures(1, &depthMapTexture);
+    glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glGenFramebuffers(1, &depthMapFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_FRAMEBUFFER_SRGB);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     while (!glfwWindowShouldClose(window))
     {
-        glEnable(GL_DEPTH_TEST);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        glStencilMask(0x00);
-
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
         previousTime = currentTime;
@@ -492,8 +505,42 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         ProcessInput(window);
 
         /*
+         *
+         * SHADOWS DEPTH PASS
+         * SHADOWS DEPTH PASS
+         * SHADOWS DEPTH PASS
+         *
+         */
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        float nearPlane = 1.0f;
+        float farPlane = 10.0f;
+        view        = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+
+        glm::mat4 lightSpaceMatrix = projection * view;
+        lightDepthShader->Use();
+        lightDepthShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+        model.Draw(lightDepthShader);
+        floor.Draw(lightDepthShader);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, screenWidth, screenHeight);
+
+        /*
+        *
+        * MAIN DRAW PASS
+        * MAIN DRAW PASS
+        * MAIN DRAW PASS
+        *
+        */
+        /*
          * Common shader setup
          */
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
