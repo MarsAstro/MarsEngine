@@ -551,6 +551,7 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
          * Draw solid objects
          */
         objectShader->Use();
+        objectShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
         model.Draw(objectShader);
         floor.Draw(objectShader);
