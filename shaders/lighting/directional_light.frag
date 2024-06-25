@@ -33,15 +33,18 @@ struct DirectionalLight {
     vec4 specular;
 };
 uniform DirectionalLight directionalLight;
+uniform sampler2D shadowMap;
 
 out vec4 FragmentColor;
 
 in vec3 VertexNormal;
 in vec3 FragmentPosition;
+in vec4 FragmentPositionLightSpace;
 in vec2 TextureCoordinates;
 flat in int MaterialIndex;
 
 Surface CalculateSurface();
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir);
 
 void main()
 {
@@ -59,7 +62,10 @@ void main()
     vec3 diffuse    = directionalLight.diffuse.xyz * diffuseAmount * surface.diffuse;
     vec3 specular   = directionalLight.specular.xyz * specularAmount * surface.specular;
 
-    FragmentColor = vec4(ambient + diffuse + specular, 1.0);
+    float shadow = ShadowCalculation(FragmentPositionLightSpace, normal, lightDirection);
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
+
+    FragmentColor = vec4(lighting, 1.0);
 }
 
 Surface CalculateSurface()
@@ -91,4 +97,32 @@ Surface CalculateSurface()
     surface.ambient = surface.ambient * surface.diffuse;
 
     return surface;
+}
+
+float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
+{
+    float shadow = 0.0;
+
+    vec3 projectionCoordinates = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projectionCoordinates = projectionCoordinates * 0.5 + 0.5;
+
+    if (projectionCoordinates.z > 1.0)
+        return shadow;
+
+    float closestDepth = texture(shadowMap, projectionCoordinates.xy).r;
+    float currentDepth = projectionCoordinates.z;
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for (int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMap, projectionCoordinates.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    return shadow;
 }

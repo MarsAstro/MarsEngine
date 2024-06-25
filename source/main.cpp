@@ -20,8 +20,8 @@ using Geometry::Model;
 
 constexpr int SCREEN_WIDTH = 1200;
 constexpr int SCREEN_HEIGHT = 900;
-constexpr int SHADOW_WIDTH = 1024;
-constexpr int SHADOW_HEIGHT = 1024;
+constexpr int SHADOW_WIDTH = 2048;
+constexpr int SHADOW_HEIGHT = 2048;
 constexpr int MSAA = 16;
 int screenWidth = SCREEN_WIDTH;
 int screenHeight = SCREEN_HEIGHT;
@@ -450,9 +450,9 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
             "shaders/lighting/light_space.vert",
             "shaders/lighting/light_space.frag");
 
+    glm::vec3 lightDir = glm::vec3(0.33f, -1.0f, 0.3f);
     resourceManager.lightManager.SetDirectionalLight(
-        glm::vec3(-0.2f, -1.0f, -0.3f),
-        glm::vec3(0.02f), glm::vec3(0.8f), glm::vec3(1.0f)
+        lightDir, glm::vec3(0.2f), glm::vec3(1.0f), glm::vec3(1.0f)
     );
 
     unsigned int skyboxVAO, skyboxTexture;
@@ -470,8 +470,6 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
     Model model = resourceManager.LoadModel("assets/models/rock/rock.obj");
     Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
-
-    resourceManager.ApplyMaterials(objectShader);
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
     unsigned int depthMapFBO, depthMapTexture;
@@ -481,8 +479,10 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
     glGenFramebuffers(1, &depthMapFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -490,6 +490,14 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    int textureCount = resourceManager.GetTextureCount();
+    objectShader->Use();
+    objectShader->SetInt("shadowMap", textureCount);
+    glActiveTexture(GL_TEXTURE0 + textureCount);
+    glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+
+    resourceManager.ApplyMaterials(objectShader);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -516,16 +524,18 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         glClear(GL_DEPTH_BUFFER_BIT);
 
         float nearPlane = 1.0f;
-        float farPlane = 10.0f;
-        view        = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        float farPlane = 20.0f;
+        view        = lookAt(lightDir * -10.0f, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
 
         glm::mat4 lightSpaceMatrix = projection * view;
         lightDepthShader->Use();
         lightDepthShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
+        glCullFace(GL_FRONT);
         model.Draw(lightDepthShader);
         floor.Draw(lightDepthShader);
+        glCullFace(GL_BACK);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, screenWidth, screenHeight);
