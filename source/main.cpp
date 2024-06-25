@@ -444,20 +444,11 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         "shaders/general/skybox.vert",
         "shaders/general/skybox.frag",
         { Matrices });
-    ShaderProgram* screenSpaceShader    = resourceManager.CreateShaderProgram(
-        "shaders/post_processing/default_screen_space.vert",
-        "shaders/post_processing/default_screen_space.frag");
 
     resourceManager.lightManager.SetDirectionalLight(
         glm::vec3(-0.2f, -1.0f, -0.3f),
-        glm::vec3(0.01f), glm::vec3(0.8f), glm::vec3(1.0f)
+        glm::vec3(0.02f), glm::vec3(0.8f), glm::vec3(1.0f)
     );
-
-    SetupFramebuffer();
-    unsigned int drawBuffer = MSAA > 0 ? msaaFramebuffer : framebuffer;
-
-    unsigned int screenVAO, screenVBO, screenEBO, screenIndicesCount;
-    Geometry::CreateSquare(1.0f, screenVAO, screenVBO, screenEBO, screenIndicesCount);
 
     unsigned int skyboxVAO, skyboxTexture;
     Geometry::CreateSkyboxCube(skyboxVAO);
@@ -475,12 +466,6 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     Model model = resourceManager.LoadModel("assets/models/rock/rock.obj");
     Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
 
-    int textureCount = resourceManager.GetTextureCount();
-    screenSpaceShader->Use();
-    screenSpaceShader->SetInt("screenTexture", textureCount);
-    glActiveTexture(GL_TEXTURE0 + textureCount++);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-
     resourceManager.ApplyMaterials(objectShader);
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
@@ -492,14 +477,6 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
 
     while (!glfwWindowShouldClose(window))
     {
-        /*
-        *
-        * MAIN DRAW PASS
-        * MAIN DRAW PASS
-        * MAIN DRAW PASS
-        *
-        */
-        glBindFramebuffer(GL_FRAMEBUFFER, drawBuffer);
         glEnable(GL_DEPTH_TEST);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
@@ -545,34 +522,6 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         resourceManager.SetViewMatrix(view);
 
         glDepthFunc(GL_LESS);
-
-        /*
-        *
-        * SCREEN SPACE DRAW PASS
-        * SCREEN SPACE DRAW PASS
-        * SCREEN SPACE DRAW PASS
-        *
-        */
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-
-        if constexpr (MSAA > 0)
-        {
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFramebuffer);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-            glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glBindVertexArray(screenVAO);
-        screenSpaceShader->Use();
-
-        glDrawElements(GL_TRIANGLES, screenIndicesCount, GL_UNSIGNED_INT, nullptr);
-
-        glEnable(GL_CULL_FACE);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
