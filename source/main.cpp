@@ -15,6 +15,7 @@
 #include "geometry/geometry_functions.h"
 #include "resource_manager.h"
 #include "geometry/model.h"
+#include "scenes/scene.h"
 
 using Shading::ShaderProgram;
 using Geometry::Model;
@@ -464,7 +465,12 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
     Model model = resourceManager.LoadModel("assets/models/rock/rock.obj");
     Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
-    floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
+
+    Scene scene;
+    scene.AddObject(&floor, glm::vec3(0.0f, -3.5f, 0.0f));
+    scene.AddObject(&model, glm::vec3(0.0f));
+    scene.AddObject(&model, glm::vec3(0.0f, 3.0f, -2.0f));
+    scene.AddObject(&model, glm::vec3(4.0f, 0.0f, 3.0f));
 
     int textureCount = resourceManager.GetTextureCount();
     objectShader->Use();
@@ -509,13 +515,7 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         lightDepthShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
         glCullFace(GL_FRONT);
-        model.position = glm::vec3(0.0f);
-        model.Draw(lightDepthShader);
-        model.position = glm::vec3(0.0f, 3.0f, -2.0f);
-        model.Draw(lightDepthShader);
-        model.position = glm::vec3(4.0f, 0.0f, 3.0f);
-        model.Draw(lightDepthShader);
-        floor.Draw(lightDepthShader);
+        scene.DrawScene(lightDepthShader);
         glCullFace(GL_BACK);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -544,13 +544,7 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
         objectShader->Use();
         objectShader->SetMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-        model.position = glm::vec3(0.0f);
-        model.Draw(objectShader);
-        model.position = glm::vec3(0.0f, 3.0f, -2.0f);
-        model.Draw(objectShader);
-        model.position = glm::vec3(4.0f, 0.0f, 3.0f);
-        model.Draw(objectShader);
-        floor.Draw(objectShader);
+        scene.DrawScene(objectShader);
 
         /*
         * Draw skybox

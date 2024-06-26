@@ -37,6 +37,8 @@ set(SOURCE_FILES source/main.cpp libraries/glad/src/glad.c
         source/geometry/geometry_structs.h
         source/shading/lighting/light_structs.h
         source/constants.h
+        source/scenes/scene.cpp
+        source/scenes/scene.h
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
