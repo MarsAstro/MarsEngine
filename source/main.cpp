@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "stb_image.h"
 
+#include "constants.h"
 #include "camera.h"
 #include "utility/utility_functions.h"
 #include "assets/import_functions.h"
@@ -18,13 +19,20 @@
 using Shading::ShaderProgram;
 using Geometry::Model;
 
-constexpr int SCREEN_WIDTH = 1200;
-constexpr int SCREEN_HEIGHT = 900;
-constexpr int SHADOW_WIDTH = 2048;
-constexpr int SHADOW_HEIGHT = 2048;
-constexpr int MSAA = 16;
-int screenWidth = SCREEN_WIDTH;
-int screenHeight = SCREEN_HEIGHT;
+int screenWidth = Constants::SCREEN_WIDTH;
+int screenHeight = Constants::SCREEN_HEIGHT;
+float lastX = Constants::SCREEN_WIDTH / 2.0f;
+float lastY = Constants::SCREEN_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+unsigned int framebuffer, msaaFramebuffer, renderbuffer, textureColorbuffer, msaaTextureColorbuffer;
+
+Camera camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+glm::mat4 view;
+glm::mat4 projection;
+
+float previousTime = 0;
+float deltaTime = 0;
 
 namespace MainFunctions
 {
@@ -47,30 +55,16 @@ namespace MainFunctions
     void CleanupFramebuffer();
 }
 
-Camera camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
-
-glm::mat4 view;
-glm::mat4 projection;
-
-float lastX = SCREEN_WIDTH / 2.0f;
-float lastY = SCREEN_HEIGHT / 2.0f;
-bool firstMouse = true;
-
-unsigned int framebuffer, msaaFramebuffer, renderbuffer, textureColorbuffer, msaaTextureColorbuffer;
-
-float deltaTime = 0;
-float previousTime = 0;
-
 int main()
 {
-    GLFWwindow* window = Utility::SetupGLFWWindow(SCREEN_WIDTH, SCREEN_HEIGHT, MSAA, "Mars Engine");
+    GLFWwindow* window = Utility::SetupGLFWWindow(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT, Constants::MSAA, "Mars Engine");
 
     if (window == nullptr || Utility::InitializeGLADLoader() < 0)
         return -1;
 
     glfwSwapInterval(0);
     glfwSetFramebufferSizeCallback(window, MainFunctions::FramebufferSizeCallback);
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    glViewport(0, 0, Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
     glEnable(GL_MULTISAMPLE);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -237,7 +231,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
                                              1.0f, 0.09f, 0.032f);
 
     SetupFramebuffer();
-    unsigned int drawBuffer = MSAA > 0 ? msaaFramebuffer : framebuffer;
+    unsigned int drawBuffer = Constants::MSAA > 0 ? msaaFramebuffer : framebuffer;
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount, windowTexture;
     Geometry::CreateSquare(0.5f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
@@ -275,7 +269,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
 
     windowShader->Use();
     windowShader->SetInt("texture1", textureCount);
-    glActiveTexture(GL_TEXTURE0 + textureCount++);
+    glActiveTexture(GL_TEXTURE0 + textureCount);
     glBindTexture(GL_TEXTURE_2D, windowTexture);
 
     resourceManager.ApplyMaterials(objectShader);
@@ -411,7 +405,7 @@ void MainFunctions::Playground(GLFWwindow *window, ResourceManager& resourceMana
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
 
-        if constexpr (MSAA > 0)
+        if constexpr (Constants::MSAA > 0)
         {
             glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFramebuffer);
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
@@ -453,6 +447,7 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     resourceManager.lightManager.SetDirectionalLight(
         glm::vec3(0.33f, -1.0f, 0.3f), glm::vec3(0.2f), glm::vec3(1.0f), glm::vec3(1.0f)
     );
+    Shading::Lighting::DirectionalShadow dirShadow = resourceManager.lightManager.GetDirectionalShadow();
 
     unsigned int skyboxVAO, skyboxTexture;
     Geometry::CreateSkyboxCube(skyboxVAO);
@@ -471,30 +466,11 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
     Model floor = resourceManager.LoadModel("assets/models/floor/floor.obj");
     floor.position = glm::vec3(0.0f, -3.5f, 0.0f);
 
-    unsigned int depthMapFBO, depthMapTexture;
-
-    glGenTextures(1, &depthMapTexture);
-    glBindTexture(GL_TEXTURE_2D, depthMapTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-    glGenFramebuffers(1, &depthMapFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     int textureCount = resourceManager.GetTextureCount();
     objectShader->Use();
     objectShader->SetInt("shadowMap", textureCount);
     glActiveTexture(GL_TEXTURE0 + textureCount);
-    glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+    glBindTexture(GL_TEXTURE_2D, dirShadow.depthMapTexture);
 
     resourceManager.ApplyMaterials(objectShader);
 
@@ -518,15 +494,14 @@ void MainFunctions::ShadowsScene(GLFWwindow *window, ResourceManager& resourceMa
          * SHADOWS DEPTH PASS
          *
          */
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glViewport(0, 0, Constants::SHADOW_WIDTH, Constants::SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, dirShadow.depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         float nearPlane = 1.0f;
         float farPlane = 20.0f;
-        glm::vec3 dirLightPos = resourceManager.lightManager.GetDirectionalLightDirection() * -10.0f;
 
-        view        = lookAt(dirLightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        view        = lookAt(dirShadow.position, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         projection  = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
 
         glm::mat4 lightSpaceMatrix = projection * view;
@@ -755,7 +730,7 @@ void MainFunctions::SetupFramebuffer()
     glBindTexture(GL_TEXTURE_2D, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
 
-    if constexpr (MSAA <= 0)
+    if constexpr (Constants::MSAA <= 0)
     {
         glGenRenderbuffers(1, &renderbuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
@@ -777,7 +752,7 @@ void MainFunctions::SetupFramebuffer()
 
     glGenTextures(1, &msaaTextureColorbuffer);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msaaTextureColorbuffer);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA, GL_SRGB, screenWidth, screenHeight, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Constants::MSAA, GL_SRGB, screenWidth, screenHeight, GL_TRUE);
     glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
@@ -785,7 +760,7 @@ void MainFunctions::SetupFramebuffer()
 
     glGenRenderbuffers(1, &renderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, Constants::MSAA, GL_DEPTH24_STENCIL8, screenWidth, screenHeight);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
 
@@ -801,7 +776,7 @@ void MainFunctions::CleanupFramebuffer()
     glDeleteTextures(1, &textureColorbuffer);
     glDeleteRenderbuffers(1, &renderbuffer);
 
-    if constexpr (MSAA <= 0)
+    if constexpr (Constants::MSAA <= 0)
         return;
 
     glDeleteFramebuffers(1, &msaaFramebuffer);

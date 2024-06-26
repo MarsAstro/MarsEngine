@@ -24,4 +24,11 @@ namespace Shading::Lighting
         glm::vec4 diffuse;
         glm::vec4 specular;
     };
+
+    struct DirectionalShadow
+    {
+        glm::vec3 position;
+        unsigned int depthMapFBO;
+        unsigned int depthMapTexture;
+    };
 }

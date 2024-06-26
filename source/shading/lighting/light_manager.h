@@ -15,18 +15,19 @@ namespace Shading::Lighting
 
         void SetDirectionalLight(glm::vec3 direction, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);
         void AddPointLight(glm::vec3 position, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float constant, float linear, float quadratic);
-        void AddPointLight(const PointLight &pointLight);
         void MovePointLight(unsigned int index, glm::vec3 newPosition);
         void DrawPointLightCubes(const ShaderProgram* shaderProgram) const;
 
         unsigned int GetNumberOfPointLights() const;
         std::vector<PointLight> GetViewSpacePointLights(const glm::mat4& viewMatrix) const;
         DirectionalLight GetViewSpaceDirectionalLight(const glm::mat4& viewMatrix) const;
+        DirectionalShadow GetDirectionalShadow() const;
         glm::vec3 GetDirectionalLightDirection() const;
 
     private:
         std::vector<PointLight> pointLights;
         DirectionalLight directionalLight;
+        DirectionalShadow directionalShadow;
 
         unsigned int mNumPointLights = 0;
         unsigned int mVAO, mVBO;
