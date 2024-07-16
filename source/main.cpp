@@ -139,7 +139,9 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
         resourceManager.SetMatrices(view, projection);
 
         windowShader.Use();
+        windowShader.SetInt("diffuse", 0);
         windowShader.SetVec2("resolution", screenWidth, screenHeight);
+        windowShader.SetFloat("time", currentTime);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, windowTexture);
         glActiveTexture(GL_TEXTURE1);
