@@ -38,12 +38,13 @@ float deltaTime = 0;
 namespace MainFunctions
 {
     // Scenes
-    void EmptyScene(GLFWwindow *window, ResourceManager& resourceManager);
-    void SpaceScene(GLFWwindow *window, ResourceManager& resourceManager);
-    void Playground(GLFWwindow *window, ResourceManager& resourceManager);
-    void ShadowsScene(GLFWwindow *window, ResourceManager& resourceManager);
-    void GeometryHousesScene(GLFWwindow *window, ResourceManager& resourceManager);
-    void ModelViewer(GLFWwindow *window, ResourceManager& resourceManager);
+    void EmptyScene(GLFWwindow* window, ResourceManager& resourceManager);
+    void ShadersDev(GLFWwindow* window, ResourceManager& resourceManager);
+    void SpaceScene(GLFWwindow* window, ResourceManager& resourceManager);
+    void Playground(GLFWwindow* window, ResourceManager& resourceManager);
+    void ShadowsScene(GLFWwindow* window, ResourceManager& resourceManager);
+    void GeometryHousesScene(GLFWwindow* window, ResourceManager& resourceManager);
+    void ModelViewer(GLFWwindow* window, ResourceManager& resourceManager);
 
     // Input stuff
     void ProcessInput(GLFWwindow* window);
@@ -68,13 +69,13 @@ int main()
     glViewport(0, 0, Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
     glEnable(GL_MULTISAMPLE);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, MainFunctions::MouseCallback);
     glfwSetScrollCallback(window, MainFunctions::ScrollCallback);
 
     ResourceManager shaderManager = ResourceManager();
 
-    MainFunctions::ShadowsScene(window, shaderManager);
+    MainFunctions::ShadersDev(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -82,6 +83,7 @@ int main()
 
 void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &resourceManager)
 {
+    glEnable(GL_FRAMEBUFFER_SRGB);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
@@ -99,6 +101,52 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &resourceMana
         projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
 
         resourceManager.SetMatrices(view, projection);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+}
+
+void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceManager)
+{
+    unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
+    Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+
+    stbi_set_flip_vertically_on_load(true);
+    unsigned int windowTexture = Assets::LoadTexture("assets/textures/flower.jpg", GL_SRGB, GL_RGB, GL_REPEAT);
+    unsigned int overlayTexture = Assets::LoadTexture("assets/textures/grass.png", GL_SRGB_ALPHA, GL_RGBA, GL_REPEAT);
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        ShaderProgram windowShader = ShaderProgram(
+            "shaders/shadertutorial/wip.vert", "shaders/shadertutorial/wip.frag");
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+        resourceManager.SetMatrices(view, projection);
+
+        windowShader.Use();
+        windowShader.SetVec2("resolution", screenWidth, screenHeight);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, windowTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, overlayTexture);
+
+        glBindVertexArray(windowVAO);
+        glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
