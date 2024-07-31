@@ -42,7 +42,12 @@ Geometry::Model::Model(const char *path, std::vector<Material>* materials, unsig
         lineStream >> lineWord;
 
         if (lineWord == "mtllib")
-            materials->append_range(ReadMaterialFile(lineStream, path));
+        {
+            for (const auto& material : ReadMaterialFile(lineStream, path))
+            {
+                materials->push_back(material);
+            }
+        }
         else if (lineWord == "v")
             vertexPositions.push_back(ReadVec3FromLine(lineStream));
         else if (lineWord == "vn")

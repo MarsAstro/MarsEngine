@@ -3,7 +3,7 @@ project(MarsEngine)
 
 find_package(OpenGL REQUIRED)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 # Subdirectories
 add_subdirectory(libraries/glfw)
