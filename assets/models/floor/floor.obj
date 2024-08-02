@@ -1,6 +1,6 @@
 # Blender 4.0.2
 # www.blender.org
-mtllib Floor.mtl
+mtllib floor.mtl
 o Cube
 v -30.000000 -0.080694 30.000000
 v -30.000000 0.080694 30.000000

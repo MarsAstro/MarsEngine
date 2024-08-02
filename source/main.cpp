@@ -75,7 +75,7 @@ int main()
 
     ResourceManager shaderManager = ResourceManager();
 
-    MainFunctions::ShadersDev(window, shaderManager);
+    MainFunctions::Playground(window, shaderManager);
 
     glfwTerminate();
     return 0;
