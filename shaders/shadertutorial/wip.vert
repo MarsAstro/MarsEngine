@@ -12,10 +12,12 @@ uniform mat4 model;
 
 out vec2 TextureCoordinates;
 out vec3 VertexNormal;
+out vec3 FragmentPosition;
 
 void main()
 {
     gl_Position = projection * view * model * vec4(position, 1.0);
     VertexNormal = mat3(transpose(inverse(model))) * normal;
+    FragmentPosition = vec3(view * model * vec4(position, 1.0));
     TextureCoordinates = textureCoordinates;
 }

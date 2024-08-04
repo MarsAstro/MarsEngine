@@ -3,6 +3,7 @@ out vec4 FragmentColor;
 
 in vec3 VertexNormal;
 in vec2 TextureCoordinates;
+in vec3 FragmentPosition;
 uniform float time;
 
 vec2 uvs = TextureCoordinates;
@@ -23,6 +24,7 @@ void main()
     vec3 baseColor = vec3(0.5);
     vec3 lighting = vec3(0.0);
     vec3 normal = normalize(VertexNormal);
+    vec3 viewDir = normalize(-FragmentPosition);
 
     // Ambient
     vec3 ambient = vec3(0.5);
@@ -34,7 +36,21 @@ void main()
     float hemiMix = remap(normal.y, -1.0, 1.0, 0.0, 1.0);
     vec3 hemi = mix(groundColor, skyColor, hemiMix);
 
-    lighting = ambient * 0.0 + hemi;
+    // Diffuse lighting
+    vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+    vec3 lightColor = vec3(1.0, 1.0, 0.9);
+    float dp = max(0.0, dot(lightDir, normal));
+
+    vec3 diffuse = dp * lightColor;
+
+    // Phong specular
+    vec3 reflectDir = normalize(reflect(-lightDir, normal));
+    float phongValue = max(0.0, dot(viewDir, reflectDir));
+    phongValue = pow(phongValue, 32.0);
+
+    vec3 specular = vec3(phongValue);
+
+    lighting = ambient * 0.0 + hemi * 0.3 + diffuse * 0.4 + specular;
 
     vec3 color = baseColor * lighting;
 
