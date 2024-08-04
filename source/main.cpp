@@ -25,6 +25,8 @@ int screenHeight = Constants::SCREEN_HEIGHT;
 float lastX = Constants::SCREEN_WIDTH / 2.0f;
 float lastY = Constants::SCREEN_HEIGHT / 2.0f;
 bool firstMouse = true;
+bool cameraLock = false;
+bool canToggleCameraLock = true;
 
 unsigned int framebuffer, msaaFramebuffer, renderbuffer, textureColorbuffer, msaaTextureColorbuffer;
 
@@ -40,6 +42,7 @@ namespace MainFunctions
     // Scenes
     void EmptyScene(GLFWwindow* window, ResourceManager& resourceManager);
     void ShadersDev(GLFWwindow* window, ResourceManager& resourceManager);
+    void ScreenShader(GLFWwindow* window, ResourceManager& resourceManager);
     void SpaceScene(GLFWwindow* window, ResourceManager& resourceManager);
     void Playground(GLFWwindow* window, ResourceManager& resourceManager);
     void ShadowsScene(GLFWwindow* window, ResourceManager& resourceManager);
@@ -75,7 +78,7 @@ int main()
 
     ResourceManager shaderManager = ResourceManager();
 
-    MainFunctions::Playground(window, shaderManager);
+    MainFunctions::ShadersDev(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -108,6 +111,78 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &resourceMana
 }
 
 void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceManager)
+{
+    ShaderProgram* skyboxShader         = resourceManager.CreateShaderProgram(
+    "shaders/general/skybox.vert",
+    "shaders/general/skybox.frag",
+    { Matrices });
+
+    unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
+    Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+
+    unsigned int skyboxVAO;
+    Geometry::CreateSkyboxCube(skyboxVAO);
+
+    std::vector<std::string> skyboxFaces
+    {
+        "assets/textures/ocean_mountains/right.jpg",
+        "assets/textures/ocean_mountains/left.jpg",
+        "assets/textures/ocean_mountains/top.jpg",
+        "assets/textures/ocean_mountains/bottom.jpg",
+        "assets/textures/ocean_mountains/front.jpg",
+        "assets/textures/ocean_mountains/back.jpg"
+    };
+    unsigned int skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
+
+    Model suzanne = resourceManager.LoadModel("assets/models/suzanne/suzanne.obj");
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        ShaderProgram objectShader = ShaderProgram(
+            "shaders/shadertutorial/wip.vert", "shaders/shadertutorial/wip.frag");
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+        resourceManager.SetMatrices(view, projection);
+
+        objectShader.Use();
+        objectShader.SetFloat("time", currentTime);
+        suzanne.Draw(&objectShader);
+
+        /*
+        * Draw skybox
+        */
+        glDepthFunc(GL_LEQUAL);
+
+        skyboxShader->Use();
+
+        resourceManager.SetViewMatrix(glm::mat4(glm::mat3(view)));
+        glBindVertexArray(skyboxVAO);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        resourceManager.SetViewMatrix(view);
+
+        glDepthFunc(GL_LESS);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+}
+
+void MainFunctions::ScreenShader(GLFWwindow *window, ResourceManager &resourceManager)
 {
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
     Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
@@ -726,6 +801,14 @@ void MainFunctions::ProcessInput(GLFWwindow* window)
         camera.ProcessKeyboard(BACKWARD, deltaTime, tripleSpeed);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime, tripleSpeed);
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && canToggleCameraLock)
+    {
+        cameraLock = !cameraLock;
+        canToggleCameraLock = false;
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+        canToggleCameraLock = true;
 }
 
 void MainFunctions::MouseCallback(GLFWwindow* window, const double xpos, const double ypos)
@@ -742,7 +825,8 @@ void MainFunctions::MouseCallback(GLFWwindow* window, const double xpos, const d
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    if (!cameraLock)
+        camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void MainFunctions::ScrollCallback(GLFWwindow* window, double xoffset, const double yoffset)
