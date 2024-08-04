@@ -35,7 +35,7 @@ void LightManager::SetDirectionalLight(glm::vec3 direction, glm::vec3 ambient, g
 {
     directionalLight = DirectionalLight
     {
-        glm::vec4(direction, 0.0f),
+        glm::vec4(direction, 1.0f),
         glm::vec4(ambient, 1.0f),
         glm::vec4(diffuse, 1.0f),
         glm::vec4(specular, 1.0f)
@@ -52,7 +52,7 @@ void LightManager::AddPointLight(glm::vec3 position, glm::vec3 ambient, glm::vec
 
     PointLight newPointLight
     {
-        glm::vec4(position, 0.0f),
+        glm::vec4(position, 1.0f),
         glm::vec4(ambient, 1.0f),
         glm::vec4(diffuse, 1.0f),
         glm::vec4(specular, 1.0f),
