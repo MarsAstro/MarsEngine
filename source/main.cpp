@@ -136,7 +136,7 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
     };
     unsigned int skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
 
-    Model suzanne = resourceManager.LoadModel("assets/models/suzanne/suzanne.obj");
+    Model suzanne = resourceManager.LoadModel("assets/shapes/cube.obj");
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -208,7 +208,7 @@ void MainFunctions::CelShader(GLFWwindow *window, ResourceManager &resourceManag
     };
     unsigned int skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
 
-    Model suzanne = resourceManager.LoadModel("assets/models/suzanne/suzanne.obj");
+    Model suzanne = resourceManager.LoadModel("assets/shapes/suzanne.obj");
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -280,7 +280,7 @@ void MainFunctions::LightingShaderDev(GLFWwindow *window, ResourceManager &resou
     };
     unsigned int skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
 
-    Model suzanne = resourceManager.LoadModel("assets/models/suzanne/suzanne.obj");
+    Model suzanne = resourceManager.LoadModel("assets/shapes/suzanne.obj");
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
