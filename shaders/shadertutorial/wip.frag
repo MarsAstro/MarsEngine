@@ -29,9 +29,6 @@ void main()
     vec3 normal = normalize(VertexNormal);
     vec3 viewDir = normalize(-FragmentPosition);
 
-    // Ambient
-    vec3 ambient = vec3(0.5);
-
     // Hemi light
     vec3 skyColor = vec3(0.6, 0.8, 0.9);
     vec3 groundColor = vec3(0.0, 0.05, 0.2);
@@ -44,13 +41,7 @@ void main()
     vec3 lightColor = vec3(1.0, 1.0, 0.9);
     float dp = max(0.0, dot(lightDir, normal));
 
-    // Toon
-    //dp *= smoothstep(0.5, 0.52, dp);
-
-    // 3 Colours
-    float lower = smoothstep(0.4, 0.42, dp);
-    float upper = smoothstep(0.6, 0.62, dp);
-
+    // Colorbanding
     dp = mix(0.5, 1.0, step(0.65, dp)) * step(0.5, dp);
 
     vec3 diffuse = dp * lightColor;
@@ -68,9 +59,9 @@ void main()
     vec3 specular = vec3(phongValue);
     specular = smoothstep(0.5, 0.52, specular);
 
-    lighting = hemi * (fresnel + 0.3) + diffuse * 1.0;
+    lighting = hemi * (fresnel + 0.3) + diffuse;
 
     vec3 color = baseColor * lighting + specular;
 
     FragmentColor = vec4(color, 1.0);
-} 
+}
