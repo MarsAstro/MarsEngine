@@ -7,12 +7,12 @@ vec2 uvs = TextureCoordinates;
 uniform vec2 resolution;
 uniform float time;
 
-vec3 red = vec3(1.0, 0.0, 0.0);
-vec3 green = vec3(0.0, 1.0, 0.0);
-vec3 blue = vec3(0.0, 0.0, 1.0);
-vec3 white = vec3(1.0, 1.0, 1.0);
-vec3 black = vec3(0.0, 0.0, 0.0);
-vec3 yellow = vec3(1.0, 1.0, 0.0);
+vec3 RED = vec3(1.0, 0.0, 0.0);
+vec3 GREEN = vec3(0.0, 1.0, 0.0);
+vec3 BLUE = vec3(0.0, 0.0, 1.0);
+vec3 WHITE = vec3(1.0, 1.0, 1.0);
+vec3 BLACK = vec3(0.0, 0.0, 0.0);
+vec3 YELLOW = vec3(1.0, 1.0, 0.0);
 
 float inverseLerp(float v, float minValue, float maxValue)
 {
@@ -48,6 +48,27 @@ vec3 DrawGrid(vec3 color, vec3 lineColor, float cellSpacing, float lineWidth)
     return color;
 }
 
+float sdfCircle(vec2 p, float r)
+{
+    return length(p) - r;
+}
+
+float sdfLine(vec2 p, vec2 a, vec2 b)
+{
+    vec2 pa = p - a;
+    vec2 ba = b - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+
+    return length(pa - ba * h);
+}
+
+float sdfBox(vec2 p, vec2 b)
+{
+    vec2 d = abs(p) - b;
+
+    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
 void main()
 {
     vec2 pixelCoords = (uvs - 0.5) * resolution;
@@ -55,6 +76,9 @@ void main()
     vec3 color = BackgroundColor();
     color = DrawGrid(color, vec3(0.5), 10.0, 1.0);
     color = DrawGrid(color, vec3(0.0), 100.0, 2.0);
+
+    float d = sdfBox(pixelCoords, vec2(250.0, 75.0));
+    color = mix(RED, color, step(0.0, d));
 
     FragmentColor = vec4(color, 1.0);
 }
