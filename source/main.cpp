@@ -42,6 +42,7 @@ namespace MainFunctions
     // Scenes
     void EmptyScene(GLFWwindow* window, ResourceManager& resourceManager);
     void ShadersDev(GLFWwindow* window, ResourceManager& resourceManager);
+    void VertexColors(GLFWwindow *window, ResourceManager &resourceManager);
     void CelShader(GLFWwindow* window, ResourceManager& resourceManager);
     void LightingShaderDev(GLFWwindow* window, ResourceManager& resourceManager);
     void ScreenShader(GLFWwindow* window, ResourceManager& resourceManager);
@@ -145,7 +146,79 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
     while (!glfwWindowShouldClose(window))
     {
         ShaderProgram objectShader = ShaderProgram(
-            "shaders/shadertutorial/wip.vert", "shaders/shadertutorial/wip.frag");
+            "shaders/shaderdev/wip.vert", "shaders/shaderdev/wip.frag");
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+        resourceManager.SetMatrices(view, projection);
+
+        objectShader.Use();
+        objectShader.SetFloat("time", currentTime);
+        suzanne.Draw(&objectShader);
+
+        /*
+        * Draw skybox
+        */
+        glDepthFunc(GL_LEQUAL);
+
+        skyboxShader->Use();
+
+        resourceManager.SetViewMatrix(glm::mat4(glm::mat3(view)));
+        glBindVertexArray(skyboxVAO);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        resourceManager.SetViewMatrix(view);
+
+        glDepthFunc(GL_LESS);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+}
+
+void MainFunctions::VertexColors(GLFWwindow *window, ResourceManager &resourceManager)
+{
+    ShaderProgram* skyboxShader         = resourceManager.CreateShaderProgram(
+    "shaders/general/skybox.vert",
+    "shaders/general/skybox.frag",
+    { Matrices });
+
+    unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
+    Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+
+    unsigned int skyboxVAO;
+    Geometry::CreateSkyboxCube(skyboxVAO);
+
+    std::vector<std::string> skyboxFaces
+    {
+        "assets/textures/ocean_mountains/right.jpg",
+        "assets/textures/ocean_mountains/left.jpg",
+        "assets/textures/ocean_mountains/top.jpg",
+        "assets/textures/ocean_mountains/bottom.jpg",
+        "assets/textures/ocean_mountains/front.jpg",
+        "assets/textures/ocean_mountains/back.jpg"
+    };
+    unsigned int skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
+
+    Model suzanne = resourceManager.LoadModel("assets/shapes/cube.obj");
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        ShaderProgram objectShader = ShaderProgram(
+            "shaders/shaderdev/vertex_colors.vert", "shaders/shaderdev/vertex_colors.frag");
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
@@ -217,7 +290,7 @@ void MainFunctions::CelShader(GLFWwindow *window, ResourceManager &resourceManag
     while (!glfwWindowShouldClose(window))
     {
         ShaderProgram objectShader = ShaderProgram(
-            "shaders/shadertutorial/model.vert", "shaders/shadertutorial/cel_shading.frag");
+            "shaders/shaderdev/model.vert", "shaders/shaderdev/cel_shading.frag");
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
@@ -289,7 +362,7 @@ void MainFunctions::LightingShaderDev(GLFWwindow *window, ResourceManager &resou
     while (!glfwWindowShouldClose(window))
     {
         ShaderProgram objectShader = ShaderProgram(
-            "shaders/shadertutorial/model.vert", "shaders/shadertutorial/lighting.frag");
+            "shaders/shaderdev/model.vert", "shaders/shaderdev/lighting.frag");
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
@@ -344,7 +417,7 @@ void MainFunctions::ScreenShader(GLFWwindow *window, ResourceManager &resourceMa
     while (!glfwWindowShouldClose(window))
     {
         ShaderProgram windowShader = ShaderProgram(
-            "shaders/shadertutorial/wip.vert", "shaders/shadertutorial/wip.frag");
+            "shaders/shaderdev/wip.vert", "shaders/shaderdev/wip.frag");
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;

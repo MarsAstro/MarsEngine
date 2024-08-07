@@ -9,11 +9,12 @@ layout (std140) uniform Matrices
     mat4 projection;
 };
 uniform mat4 model;
-uniform float time;
 
 out vec2 TextureCoordinates;
 out vec3 VertexNormal;
 out vec3 FragmentPosition;
+out vec3 LocalPosition;
+out vec4 VertexColor;
 
 float inverseLerp(float v, float minValue, float maxValue)
 {
@@ -66,11 +67,17 @@ void main()
 {
     vec3 localSpacePosition = position;
 
-    localSpacePosition.xz *= remap(sin(time), -1.0, 1.0, 0.1, 1.5);
-    localSpacePosition = rotateZ(time) * localSpacePosition;
-
     gl_Position = projection * view * model * vec4(localSpacePosition, 1.0);
     VertexNormal = mat3(transpose(inverse(model))) * normal;
+    LocalPosition = position;
     FragmentPosition = vec3(view * model * vec4(position, 1.0));
     TextureCoordinates = textureCoordinates;
+
+    vec3 red = vec3(1.0, 0.0, 0.0);
+    vec3 blue = vec3(0.0, 0.0, 1.0);
+
+    float t = remap(position.x, -1.0, 1.0, 0.0, 1.0);
+    t = pow(t, 2.0);
+
+    VertexColor = vec4(mix(red, blue, t), t);
 }
