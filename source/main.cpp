@@ -115,29 +115,8 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &resourceMana
 
 void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceManager)
 {
-    ShaderProgram* skyboxShader         = resourceManager.CreateShaderProgram(
-    "shaders/general/skybox.vert",
-    "shaders/general/skybox.frag",
-    { Matrices });
-
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
     Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
-
-    unsigned int skyboxVAO;
-    Geometry::CreateSkyboxCube(skyboxVAO);
-
-    std::vector<std::string> skyboxFaces
-    {
-        "assets/textures/ocean_mountains/right.jpg",
-        "assets/textures/ocean_mountains/left.jpg",
-        "assets/textures/ocean_mountains/top.jpg",
-        "assets/textures/ocean_mountains/bottom.jpg",
-        "assets/textures/ocean_mountains/front.jpg",
-        "assets/textures/ocean_mountains/back.jpg"
-    };
-    unsigned int skyboxTexture = Assets::LoadCubemap(skyboxFaces, GL_SRGB, GL_RGB);
-
-    Model suzanne = resourceManager.LoadModel("assets/shapes/cube.obj");
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -145,7 +124,7 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
 
     while (!glfwWindowShouldClose(window))
     {
-        ShaderProgram objectShader = ShaderProgram(
+        ShaderProgram windowShader = ShaderProgram(
             "shaders/shaderdev/wip.vert", "shaders/shaderdev/wip.frag");
 
         float currentTime = glfwGetTime();
@@ -161,24 +140,12 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
 
         resourceManager.SetMatrices(view, projection);
 
-        objectShader.Use();
-        objectShader.SetFloat("time", currentTime);
-        suzanne.Draw(&objectShader);
+        windowShader.Use();
+        windowShader.SetVec2("resolution", screenWidth, screenHeight);
+        windowShader.SetFloat("time", currentTime);
 
-        /*
-        * Draw skybox
-        */
-        glDepthFunc(GL_LEQUAL);
-
-        skyboxShader->Use();
-
-        resourceManager.SetViewMatrix(glm::mat4(glm::mat3(view)));
-        glBindVertexArray(skyboxVAO);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        resourceManager.SetViewMatrix(view);
-
-        glDepthFunc(GL_LESS);
+        glBindVertexArray(windowVAO);
+        glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
