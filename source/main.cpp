@@ -42,6 +42,7 @@ namespace MainFunctions
     // Scenes
     void EmptyScene(GLFWwindow* window, ResourceManager& resourceManager);
     void ShadersDev(GLFWwindow* window, ResourceManager& resourceManager);
+    void FunkySDF(GLFWwindow *window, ResourceManager &resourceManager);
     void VertexColors(GLFWwindow *window, ResourceManager &resourceManager);
     void CelShader(GLFWwindow* window, ResourceManager& resourceManager);
     void LightingShaderDev(GLFWwindow* window, ResourceManager& resourceManager);
@@ -126,6 +127,45 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
     {
         ShaderProgram windowShader = ShaderProgram(
             "shaders/shaderdev/wip.vert", "shaders/shaderdev/wip.frag");
+
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - previousTime;
+        previousTime = currentTime;
+
+        ProcessInput(window);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+
+        resourceManager.SetMatrices(view, projection);
+
+        windowShader.Use();
+        windowShader.SetVec2("resolution", screenWidth, screenHeight);
+        windowShader.SetFloat("time", currentTime);
+
+        glBindVertexArray(windowVAO);
+        glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+}
+
+void MainFunctions::FunkySDF(GLFWwindow *window, ResourceManager &resourceManager)
+{
+    unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
+    Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
+    while (!glfwWindowShouldClose(window))
+    {
+        ShaderProgram windowShader = ShaderProgram(
+            "shaders/shaderdev/screen_space.vert", "shaders/shaderdev/funky_sdf.frag");
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
@@ -384,7 +424,7 @@ void MainFunctions::ScreenShader(GLFWwindow *window, ResourceManager &resourceMa
     while (!glfwWindowShouldClose(window))
     {
         ShaderProgram windowShader = ShaderProgram(
-            "shaders/shaderdev/wip.vert", "shaders/shaderdev/wip.frag");
+            "shaders/shaderdev/screen_space.vert", "shaders/shaderdev/grid_functions.frag");
 
         float currentTime = glfwGetTime();
         deltaTime = currentTime - previousTime;
