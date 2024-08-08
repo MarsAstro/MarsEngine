@@ -69,6 +69,24 @@ float sdfBox(vec2 p, vec2 b)
     return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
+float sdfHexagon(vec2 p, float r)
+{
+    vec3 k = vec3(-0.866025404, 0.5, 0.577350269);
+    p = abs(p);
+    p -= 2.0 * min(dot(k.xy, p), 0.0) * k.xy;
+    p -= vec2(clamp(p.x, -k.z * r, k.z * r), r);
+
+    return length(p) * sign(p.y);
+}
+
+mat2 rotate2D(float angle)
+{
+    float sn = sin(angle);
+    float cs = cos(angle);
+
+    return mat2(cs, -sn, sn, cs);
+}
+
 void main()
 {
     vec2 pixelCoords = (uvs - 0.5) * resolution;
@@ -77,7 +95,9 @@ void main()
     color = DrawGrid(color, vec3(0.5), 10.0, 1.0);
     color = DrawGrid(color, vec3(0.0), 100.0, 2.0);
 
-    float d = sdfBox(pixelCoords, vec2(250.0, 75.0));
+    vec2 pos = pixelCoords - vec2(200.0, 300.0);
+    pos *= rotate2D(time * 0.25);
+    float d = sdfBox(pos, vec2(300.0, 100.0));
     color = mix(RED, color, step(0.0, d));
 
     FragmentColor = vec4(color, 1.0);
