@@ -95,10 +95,12 @@ void main()
     color = DrawGrid(color, vec3(0.5), 10.0, 1.0);
     color = DrawGrid(color, vec3(0.0), 100.0, 2.0);
 
-    vec2 pos = pixelCoords - vec2(200.0, 300.0);
-    pos *= rotate2D(time * 0.25);
-    float d = sdfBox(pos, vec2(300.0, 100.0));
-    color = mix(RED, color, step(0.0, d));
+    float d = sdfCircle(pixelCoords, 400.0);
+    float d2 = sdfHexagon(pixelCoords, 200.0);
+
+    d = mix(d, d2, remap(sin(time * 3), -1.0, 1.0, 0.0, 1.0));
+    color = mix(RED * 0.25, color, smoothstep(-1.0, 1.0, d));
+    color = mix(RED, color, smoothstep(-5.0, 0.0, d));
 
     FragmentColor = vec4(color, 1.0);
 }
