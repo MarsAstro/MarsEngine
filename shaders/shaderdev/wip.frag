@@ -18,35 +18,57 @@ float remap(float v, float inMin, float inMax, float outMin, float outMax)
     return mix(outMin, outMax, t);
 }
 
-float random(vec2 p)
+vec3 hash(vec3 p)
 {
-    p = 50.0 * fract(p * 0.3183099 + vec2(0.71, 0.113));
-    return -1.0 + 2.0 * fract(p.x * p.y * (p.x + p.y));
+    p = vec3(dot(p, vec3(127.1, 311.7,  74.7)),
+             dot(p, vec3(269.5, 183.3, 246.1)),
+             dot(p, vec3(113.5, 271.9, 124.6)));
+
+    return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
 }
 
-vec4 noise(vec2 coords)
+float noise(vec3 p)
 {
-    vec2 texSize = vec2(2.0);
-    vec2 pc = coords * texSize - 0.5;
-    vec2 base = floor(pc) + 0.5;
+    vec3 i = floor(p);
+    vec3 f = fract(p);
 
-    float s1 = random((base + vec2(0.0, 0.0)) / texSize);
-    float s2 = random((base + vec2(1.0, 0.0)) / texSize);
-    float s3 = random((base + vec2(0.0, 1.0)) / texSize);
-    float s4 = random((base + vec2(1.0, 1.0)) / texSize);
+    vec3 u = f * f * (3.0 - 2.0 * f);
 
-    vec2 f = smoothstep(0.0, 1.0, fract(pc));
+    return mix(mix(mix(dot(hash(i + vec3(0.0,0.0,0.0)), f - vec3(0.0,0.0,0.0)),
+                       dot(hash(i + vec3(1.0,0.0,0.0)), f - vec3(1.0,0.0,0.0)), u.x),
+                   mix(dot(hash(i + vec3(0.0,1.0,0.0)), f - vec3(0.0,1.0,0.0)),
+                       dot(hash(i + vec3(1.0,1.0,0.0)), f - vec3(1.0,1.0,0.0)), u.x), u.y),
+               mix(mix(dot(hash(i + vec3(0.0,0.0,1.0)), f - vec3(0.0,0.0,1.0)),
+                       dot(hash(i + vec3(1.0,0.0,1.0)), f - vec3(1.0,0.0,1.0)), u.x),
+                   mix(dot(hash(i + vec3(0.0,1.0,1.0)), f - vec3(0.0,1.0,1.0)),
+                       dot(hash(i + vec3(1.0,1.0,1.0)), f - vec3(1.0,1.0,1.0)), u.x), u.y), u.z);
+}
 
-    float px1 = mix(s1, s2, f.x);
-    float px2 = mix(s3, s4, f.x);
-    float result = mix(px1, px2, f.y);
+float fbm(vec3 p, int octaves, float persistence, float lacunarity)
+{
+    float amplitude = 0.5;
+    float frequency = 1.0;
+    float total = 0.0;
+    float normalization = 0.0;
 
-    return vec4(result);
+    for (int i = 0; i < octaves; ++i)
+    {
+        float noiseValue = noise(p * frequency);
+        total += noiseValue * amplitude;
+        normalization += amplitude;
+        amplitude *= persistence;
+        frequency *= lacunarity;
+    }
+
+    total /= normalization;
+    total = smoothstep(-1.0, 1.0, total);
+
+    return total;
 }
 
 void main()
 {
-    vec4 color = noise(uvs * 10.0);
+    vec3 color = vec3(0.0);
 
-    FragmentColor = color;
+    FragmentColor = vec4(color, 1.0);
 }
