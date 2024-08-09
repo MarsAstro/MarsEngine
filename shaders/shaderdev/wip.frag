@@ -66,9 +66,32 @@ float fbm(vec3 p, int octaves, float persistence, float lacunarity)
     return total;
 }
 
+vec3 GenerateSky()
+{
+    vec3 color1 = vec3(0.4, 0.6, 0.9);
+    vec3 color2 = vec3(0.1, 0.15, 0.4);
+
+    return mix(color1, color2, smoothstep(0.0, 1.0, uvs.y));
+}
+
+vec3 DrawMountains(vec3 background, vec3 mountainColor, vec2 pixelCoords)
+{
+    float y = sin(pixelCoords.x / 256.0) * 256.0;
+
+    float sdfMountain = pixelCoords.y - y;
+
+    vec3 color = mix(mountainColor, background, smoothstep(0.0, 1.0, sdfMountain));
+
+    return color;
+}
+
+
 void main()
 {
-    vec3 color = vec3(0.0);
+    vec2 pixelCoords = (uvs - 0.5) * resolution;
+    vec3 color = GenerateSky();
+
+    color = DrawMountains(color, vec3(0.0), pixelCoords);
 
     FragmentColor = vec4(color, 1.0);
 }
