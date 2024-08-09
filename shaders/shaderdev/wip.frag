@@ -26,9 +26,9 @@ float random(vec2 p)
 
 vec4 noise(vec2 coords)
 {
-    vec2 texSize = vec2(1.0);
-    vec2 pc = coords * texSize;
-    vec2 base = floor(pc);
+    vec2 texSize = vec2(2.0);
+    vec2 pc = coords * texSize - 0.5;
+    vec2 base = floor(pc) + 0.5;
 
     float s1 = random((base + vec2(0.0, 0.0)) / texSize);
     float s2 = random((base + vec2(1.0, 0.0)) / texSize);
@@ -46,7 +46,7 @@ vec4 noise(vec2 coords)
 
 void main()
 {
-    vec4 color = noise(uvs * 20.0);
+    vec4 color = noise(uvs * 10.0);
 
     FragmentColor = color;
 }
