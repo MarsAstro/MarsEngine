@@ -118,8 +118,13 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
     Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
 
+    stbi_set_flip_vertically_on_load(true);
+    unsigned int diffuse1 = Assets::LoadTexture("assets/textures/flower.jpg", GL_SRGB, GL_RGB, GL_REPEAT);
+    unsigned int diffuse2 = Assets::LoadTexture("assets/textures/flower.jpg", GL_SRGB, GL_RGB, GL_REPEAT);
+
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -140,8 +145,15 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
         resourceManager.SetMatrices(view, projection);
 
         windowShader.Use();
+        windowShader.SetInt("diffuse1", 0);
+        windowShader.SetInt("diffuse2", 1);
         windowShader.SetVec2("resolution", screenWidth, screenHeight);
         windowShader.SetFloat("time", currentTime);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuse1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, diffuse2);
 
         glBindVertexArray(windowVAO);
         glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
@@ -372,8 +384,13 @@ void MainFunctions::ScreenShader(GLFWwindow *window, ResourceManager &resourceMa
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
     Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
 
+    stbi_set_flip_vertically_on_load(true);
+    unsigned int diffuse1 = Assets::LoadTexture("assets/textures/flower.jpg", GL_SRGB, GL_RGB, GL_REPEAT);
+    unsigned int diffuse2 = Assets::LoadTexture("assets/textures/flower.jpg", GL_SRGB, GL_RGB, GL_REPEAT);
+
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -394,8 +411,15 @@ void MainFunctions::ScreenShader(GLFWwindow *window, ResourceManager &resourceMa
         resourceManager.SetMatrices(view, projection);
 
         windowShader.Use();
+        windowShader.SetInt("diffuse1", 0);
+        windowShader.SetInt("diffuse2", 1);
         windowShader.SetVec2("resolution", screenWidth, screenHeight);
         windowShader.SetFloat("time", currentTime);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuse1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, diffuse2);
 
         glBindVertexArray(windowVAO);
         glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
