@@ -114,7 +114,7 @@ float CalculateShadow(vec3 pos, vec3 lightDir)
         float distToScene = map(pos + lightDir * d).dist;
 
         if (distToScene < 0.001)
-            return 0.05;
+        return 0.05;
 
         d += distToScene;
     }
@@ -140,7 +140,7 @@ float CalculateAO(vec3 pos, vec3 normal)
 vec3 RayMarch(vec3 cameraOrigin, vec3 cameraDir)
 {
     vec3 pos;
-    vec3 skyColor = vec3(0.55, 0.6, 1.0);
+    vec3 skyColor = mix(vec3(0.55, 0.6, 1.0), vec3(0.1, 0.1, 1.0), cameraDir.y);
     MaterialData material = MaterialData(vec3(0.0), 0.0);
 
     for (int i = 0; i < NUM_STEPS; ++i)
@@ -170,7 +170,7 @@ vec3 RayMarch(vec3 cameraOrigin, vec3 cameraDir)
     lighting *= shadowed;
 
     vec3 color = material.color * lighting;
-    float fogFactor = 1.0 - exp(-pos.z * 0.01);
+    float fogFactor = 1.0 - exp(-pos.z * 0.0015);
     color = mix(color, skyColor, fogFactor);
 
     return color;
