@@ -75,7 +75,7 @@ int main()
     glViewport(0, 0, Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
     glEnable(GL_MULTISAMPLE);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, MainFunctions::MouseCallback);
     glfwSetScrollCallback(window, MainFunctions::ScrollCallback);
 
@@ -124,6 +124,16 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
         "shaders/shaderdev/ground.frag",
         { Matrices });
 
+    const int GRASS_COUNT = 1;
+    const int GRASS_SEGMENTS = 6;
+    const int GRASS_VERTICES = (GRASS_SEGMENTS + 1) * 2;
+    const int GRASS_PATCH_SIZE = 10;
+    const float GRASS_WIDTH = 0.25;
+    const float GRASS_HEIGHT = 2;
+
+    unsigned int grassVAO, grassIndicesCount;
+    Geometry::CreateGrassGeometry(GRASS_SEGMENTS, grassVAO, grassIndicesCount);
+
     camera = Camera(glm::vec3(0.0f, 3.5f, 15.0f));
     Model skysphere = resourceManager.LoadModel("assets/shapes/inverse_sphere.obj");
     Model ground = resourceManager.LoadModel("assets/shapes/plane.obj");
@@ -149,6 +159,14 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
 
         ProcessInput(window);
 
+        ShaderProgram grassShader = ShaderProgram("shaders/shaderdev/grass.vert", "shaders/shaderdev/grass.frag");
+
+        int returnValue;
+        glGetProgramiv(grassShader.mID, GL_ACTIVE_UNIFORM_BLOCKS, &returnValue);
+
+        int uniformBlockIndex = glGetUniformBlockIndex(grassShader.mID, "Matrices");
+        glUniformBlockBinding(grassShader.mID, uniformBlockIndex, 0);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         view = camera.GetViewMatrix();
@@ -161,7 +179,18 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
         skysphere.Draw(skysphereShader);
 
         groundShader->Use();
+        glBindTexture(GL_TEXTURE_2D, gridSquare);
         ground.Draw(groundShader);
+
+        grassShader.Use();
+        grassShader.SetVec4("grassParams", glm::vec4(GRASS_SEGMENTS, GRASS_VERTICES, GRASS_WIDTH, GRASS_HEIGHT));
+        grassShader.SetMat4("model", glm::mat4(1.0));
+        grassShader.SetFloat("time", currentTime);
+        grassShader.SetVec2("resolution", screenWidth, screenHeight);
+
+        glBindVertexArray(grassVAO);
+        glDrawElementsInstanced(GL_TRIANGLES, grassIndicesCount, GL_UNSIGNED_INT, nullptr, GRASS_COUNT);
+        glBindVertexArray(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

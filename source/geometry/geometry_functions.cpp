@@ -209,3 +209,40 @@ void Geometry::CreateTriangle(float fillLevel, unsigned int& VAO, unsigned int& 
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 }
+
+void Geometry::CreateGrassGeometry(const int segments, unsigned int& VAO, unsigned int& indicesCount)
+{
+    int vertices = (segments + 1) * 2;
+    int indices[segments*12];
+    indicesCount = sizeof(indices);
+
+    for (int i = 0; i < segments; ++i)
+    {
+        int vi = i * 2;
+        indices[i*12+0] = vi + 0;
+        indices[i*12+1] = vi + 1;
+        indices[i*12+2] = vi + 2;
+
+        indices[i*12+3] = vi + 2;
+        indices[i*12+4] = vi + 1;
+        indices[i*12+5] = vi + 3;
+
+        int fi = vertices + vi;
+        indices[i*12+6]  = fi + 0;
+        indices[i*12+7]  = fi + 1;
+        indices[i*12+8]  = fi + 2;
+
+        indices[i*12+9]  = fi + 2;
+        indices[i*12+10] = fi + 1;
+        indices[i*12+11] = fi + 3;
+    }
+
+    unsigned int EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+}
