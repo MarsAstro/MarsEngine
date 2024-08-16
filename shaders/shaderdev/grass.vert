@@ -33,7 +33,8 @@ void main()
     float y = heightPercent * height;
     float z = 0.0;
 
-    vec3 grassLocalPosition = vec3(x, y, z);
+    float offset = float(gl_InstanceID * 0.5);
+    vec3 grassLocalPosition = vec3(x + offset, y, z);
 
     gl_Position = projection * view * model * vec4(grassLocalPosition, 1.0);
 }
