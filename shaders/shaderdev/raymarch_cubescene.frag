@@ -170,7 +170,7 @@ vec3 RayMarch(vec3 cameraOrigin, vec3 cameraDir)
     lighting *= shadowed;
 
     vec3 color = material.color * lighting;
-    float fogFactor = 1.0 - exp(-pos.z * 0.0015);
+    float fogFactor = 1.0 - exp(-pos.z * 0.003);
     color = mix(color, skyColor, fogFactor);
 
     return color;
