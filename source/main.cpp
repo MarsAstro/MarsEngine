@@ -41,7 +41,7 @@ namespace MainFunctions
 {
     // Scenes
     void EmptyScene(GLFWwindow* window, ResourceManager& resourceManager);
-    void ShadersDev(GLFWwindow* window, ResourceManager& resourceManager);
+    void GrassScene(GLFWwindow* window, ResourceManager& resourceManager);
     void VertexColors(GLFWwindow *window, ResourceManager &resourceManager);
     void CelShader(GLFWwindow* window, ResourceManager& resourceManager);
     void LightingShaderDev(GLFWwindow* window, ResourceManager& resourceManager);
@@ -75,13 +75,13 @@ int main()
     glViewport(0, 0, Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
     glEnable(GL_MULTISAMPLE);
 
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, MainFunctions::MouseCallback);
     glfwSetScrollCallback(window, MainFunctions::ScrollCallback);
 
     ResourceManager shaderManager = ResourceManager();
 
-    MainFunctions::ShadersDev(window, shaderManager);
+    MainFunctions::GrassScene(window, shaderManager);
 
     glfwTerminate();
     return 0;
@@ -113,14 +113,29 @@ void MainFunctions::EmptyScene(GLFWwindow *window, ResourceManager &resourceMana
     }
 }
 
-void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceManager)
+void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceManager)
 {
-    unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
-    Geometry::CreateSquare(1.0f, windowVAO, windowVBO, windowEBO, windowIndicesCount);
+    ShaderProgram* skysphereShader = resourceManager.CreateShaderProgram(
+        "shaders/shaderdev/skysphere.vert",
+        "shaders/shaderdev/skysphere.frag",
+        { Matrices });
+    ShaderProgram* groundShader = resourceManager.CreateShaderProgram(
+        "shaders/shaderdev/ground.vert",
+        "shaders/shaderdev/ground.frag",
+        { Matrices });
 
-    stbi_set_flip_vertically_on_load(true);
-    unsigned int diffuse1 = Assets::LoadTexture("assets/textures/flower.jpg", GL_SRGB, GL_RGB, GL_REPEAT);
-    unsigned int diffuse2 = Assets::LoadTexture("assets/textures/flower.jpg", GL_SRGB, GL_RGB, GL_REPEAT);
+    camera = Camera(glm::vec3(0.0f, 3.5f, 15.0f));
+    Model skysphere = resourceManager.LoadModel("assets/shapes/inverse_sphere.obj");
+    Model ground = resourceManager.LoadModel("assets/shapes/plane.obj");
+    ground.scale = glm::vec3(6.0);
+    skysphere.scale = glm::vec3(50.0);
+
+    unsigned int gridSquare = Assets::LoadTexture("assets/textures/square.png", GL_SRGB_ALPHA, GL_RGB, GL_REPEAT);
+    groundShader->Use();
+    groundShader->SetInt("diffuseTexture", 0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gridSquare);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -128,10 +143,7 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
 
     while (!glfwWindowShouldClose(window))
     {
-        ShaderProgram windowShader = ShaderProgram(
-            "shaders/shaderdev/screen_space.vert", "shaders/shaderdev/wip.frag");
-
-        float currentTime = glfwGetTime();
+        float currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - previousTime;
         previousTime = currentTime;
 
@@ -144,19 +156,12 @@ void MainFunctions::ShadersDev(GLFWwindow *window, ResourceManager &resourceMana
 
         resourceManager.SetMatrices(view, projection);
 
-        windowShader.Use();
-        windowShader.SetInt("diffuse1", 0);
-        windowShader.SetInt("diffuse2", 1);
-        windowShader.SetVec2("resolution", screenWidth, screenHeight);
-        windowShader.SetFloat("time", currentTime);
+        skysphereShader->Use();
+        skysphereShader->SetVec2("resolution", screenWidth, screenHeight);
+        skysphere.Draw(skysphereShader);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuse1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, diffuse2);
-
-        glBindVertexArray(windowVAO);
-        glDrawElements(GL_TRIANGLES, windowIndicesCount, GL_UNSIGNED_INT, nullptr);
+        groundShader->Use();
+        ground.Draw(groundShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -238,8 +243,8 @@ void MainFunctions::VertexColors(GLFWwindow *window, ResourceManager &resourceMa
 void MainFunctions::CelShader(GLFWwindow *window, ResourceManager &resourceManager)
 {
     ShaderProgram* skyboxShader         = resourceManager.CreateShaderProgram(
-    "shaders/general/skybox.vert",
-    "shaders/general/skybox.frag",
+        "shaders/general/skybox.vert",
+        "shaders/general/skybox.frag",
     { Matrices });
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
@@ -310,8 +315,8 @@ void MainFunctions::CelShader(GLFWwindow *window, ResourceManager &resourceManag
 void MainFunctions::LightingShaderDev(GLFWwindow *window, ResourceManager &resourceManager)
 {
     ShaderProgram* skyboxShader         = resourceManager.CreateShaderProgram(
-    "shaders/general/skybox.vert",
-    "shaders/general/skybox.frag",
+        "shaders/general/skybox.vert",
+        "shaders/general/skybox.frag",
     { Matrices });
 
     unsigned int windowVAO, windowVBO, windowEBO, windowIndicesCount;
