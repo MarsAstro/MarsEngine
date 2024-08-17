@@ -124,10 +124,9 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
         "shaders/shaderdev/ground.frag",
         { Matrices });
 
-    const int GRASS_COUNT = 16;
+    const int GRASS_COUNT = 16 * 1024;
     const int GRASS_SEGMENTS = 6;
-    const int GRASS_VERTICES = (GRASS_SEGMENTS + 1) * 2;
-    const int GRASS_PATCH_SIZE = 10;
+    const int GRASS_PATCH_SIZE = 25;
     const float GRASS_WIDTH = 0.25;
     const float GRASS_HEIGHT = 2;
 
@@ -137,8 +136,8 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
     camera = Camera(glm::vec3(0.0f, 3.5f, 15.0f));
     Model skysphere = resourceManager.LoadModel("assets/shapes/inverse_sphere.obj");
     Model ground = resourceManager.LoadModel("assets/shapes/plane.obj");
-    ground.scale = glm::vec3(6.0);
-    skysphere.scale = glm::vec3(50.0);
+    ground.scale = glm::vec3(GRASS_PATCH_SIZE);
+    skysphere.scale = glm::vec3(100.0);
 
     unsigned int gridSquare = Assets::LoadTexture("assets/textures/square.png", GL_SRGB_ALPHA, GL_RGB, GL_REPEAT);
     groundShader->Use();
@@ -147,6 +146,7 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, gridSquare);
 
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glEnable(GL_FRAMEBUFFER_SRGB);
@@ -170,7 +170,7 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         view = camera.GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.Zoom), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 500.0f);
 
         resourceManager.SetMatrices(view, projection);
 
@@ -183,10 +183,11 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
         ground.Draw(groundShader);
 
         grassShader.Use();
-        grassShader.SetVec4("grassParams", glm::vec4(GRASS_SEGMENTS, GRASS_VERTICES, GRASS_WIDTH, GRASS_HEIGHT));
+        grassShader.SetVec4("grassParams", glm::vec4(GRASS_SEGMENTS, GRASS_PATCH_SIZE, GRASS_WIDTH, GRASS_HEIGHT));
         grassShader.SetMat4("model", glm::mat4(1.0));
         grassShader.SetFloat("time", currentTime);
         grassShader.SetVec2("resolution", screenWidth, screenHeight);
+        grassShader.SetVec3("cameraPosition", camera.Position);
 
         glBindVertexArray(grassVAO);
         glDrawElementsInstanced(GL_TRIANGLES, grassIndicesCount, GL_UNSIGNED_INT, nullptr, GRASS_COUNT);

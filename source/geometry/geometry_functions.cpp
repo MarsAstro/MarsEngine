@@ -228,13 +228,13 @@ void Geometry::CreateGrassGeometry(const int segments, unsigned int& VAO, unsign
         indices[i*12+5] = vi + 3;
 
         int fi = vertices + vi;
-        indices[i*12+6]  = fi + 0;
+        indices[i*12+6]  = fi + 2;
         indices[i*12+7]  = fi + 1;
-        indices[i*12+8]  = fi + 2;
+        indices[i*12+8]  = fi + 0;
 
-        indices[i*12+9]  = fi + 2;
+        indices[i*12+9]  = fi + 3;
         indices[i*12+10] = fi + 1;
-        indices[i*12+11] = fi + 3;
+        indices[i*12+11] = fi + 2;
     }
 
     unsigned int EBO;
