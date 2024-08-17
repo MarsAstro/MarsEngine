@@ -45,6 +45,18 @@ vec3 hemiLight(vec3 normal, vec3 groundColor, vec3 skyColor)
     return mix(groundColor, skyColor, 0.5 * normal.y + 0.5);
 }
 
+vec3 phongSpecular(vec3 normal, vec3 lightDir, vec3 viewDir)
+{
+    float dotNL = saturate(dot(normal, lightDir));
+
+    vec3 r = normalize(reflect(-lightDir, normal));
+    float phongValue = max(0.0, dot(viewDir, r));
+    phongValue = pow(phongValue, 32.0);
+
+    vec3 specular = dotNL * vec3(phongValue);
+    return specular;
+}
+
 void main()
 {
     vec3 baseColor = mix(VertexColor * 0.75, VertexColor, smoothstep(0.125, 0.0, abs(GrassData.x)));
@@ -62,9 +74,16 @@ void main()
     vec3 lightColor = vec3(1.0);
     vec3 diffuse = lambertLight(normal, viewDir, lightDir, lightColor);
 
+    // Specular
+    vec3 specular = phongSpecular(normal, lightDir, viewDir);
+
+    // Fake AO
+    float ao = remap(pow(GrassData.y, 2.0), 0.0, 1.0, 0.125, 1.0);
+
     vec3 lighting = ambientLighting * 0.5 + diffuse * 0.5;
 
-    vec3 color = baseColor * lighting;
+    vec3 color = baseColor * lighting + specular * 0.25;
+    color *= ao;
 
     FragmentColor = vec4(color, 1.0);
 }

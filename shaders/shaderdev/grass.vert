@@ -25,6 +25,11 @@ float remap(float v, float inMin, float inMax, float outMin, float outMax)
     return mix(outMin, outMax, t);
 }
 
+float saturate(float x)
+{
+    return clamp(x, 0.0, 1.0);
+}
+
 vec3 hash(vec3 p)
 {
     p = vec3(dot(p, vec3(127.1, 311.7,  74.7)),
@@ -190,9 +195,18 @@ void main()
     grassLocalNormal = mix(grassLocalNormal, vec3(0.0, 1.0, 0.0), distanceBlend * 0.5);
     grassLocalNormal = normalize(grassLocalNormal);
 
-    gl_Position = projection * view * model * vec4(grassLocalPosition, 1.0);
+    // Viewspace thicken
+    vec4 mvPosition = view * model * vec4(grassLocalPosition, 1.0);
+    vec3 viewDir = normalize(cameraPosition - grassBladeWorldPos);
+    vec3 grassFaceNormal = (grassMat * vec3(0.0, 0.0, -zSide));
+    float viewDotNormal = saturate(dot(grassFaceNormal, viewDir));
+    float viewSpaceThickenFactor = easeOut(1.0 - viewDotNormal, 4.0) * smoothstep(0.0, 0.2, viewDotNormal);
+
+    mvPosition.x += viewSpaceThickenFactor * (xSide - 0.5) * width * 0.5 * -zSide;
+
+    gl_Position = projection * mvPosition;
     FragmentPosition = (model * vec4(grassLocalPosition, 1.0)).xyz;
     VertexColor = mix(c1, c2, smoothstep(-1.0, 1.0, noiseValue));
     VertexNormal = normalize(model * vec4(grassLocalNormal, 0.0)).xyz;
-    GrassData = vec4(x, 0.0, 0.0, 0.0);
+    GrassData = vec4(x, heightPercent, 0.0, 0.0);
 }
