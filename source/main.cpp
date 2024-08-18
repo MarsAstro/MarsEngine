@@ -124,9 +124,9 @@ void MainFunctions::GrassScene(GLFWwindow *window, ResourceManager &resourceMana
         "shaders/shaderdev/ground.frag",
         { Matrices });
 
-    const int GRASS_COUNT = 32 * 1024;
+    const int GRASS_COUNT = 32 * 2048;
     const int GRASS_SEGMENTS = 6;
-    const int GRASS_PATCH_SIZE = 25;
+    const int GRASS_PATCH_SIZE = 50;
     const float GRASS_WIDTH = 0.25;
     const float GRASS_HEIGHT = 2;
 
